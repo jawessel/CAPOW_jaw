@@ -16,6 +16,16 @@ starttime = time.time()
 #import calculate_cov
 ############################################################################
 
+import scenario_chooser
+# Input scenario and year to run
+#Scenarios: 'MID' = Mid-Case, 'EV' = High EV Adoption, 'BAT' = Low Battery Storage Cost
+#   'LOWRECOST' = Low RE Cost, 'HIGHRECOST' = High RE Cost
+#Years: 2020 - 2050
+scenario = 'EV'
+year = 2020
+#This function specifies installed wind and solar capacity for each zone
+[CAISO_wind_cap, CAISO_solar_cap, PNW_wind_cap, PNW_solar_cap, EV_load] = scenario_chooser.choose(scenario, year)
+
 ############################################################################
 # STOCHASTIC WEATHER AND STREAMFLOW GENERATION
 
@@ -27,8 +37,8 @@ starttime = time.time()
 stoch_years=20
 
 # Generate synthetic weather (wind speed and temperature) records. 
-import synthetic_temp_wind_v2
-synthetic_temp_wind_v2.synthetic(stoch_years)
+import synthetic_temp_wind_v3
+synthetic_temp_wind_v3.synthetic(stoch_years)
 print('synth weather')
 
 # Generate synthetic streamflow records 
@@ -41,7 +51,7 @@ print('streamflows')
 # DAILY HYDROPOWER SIMULATION
 
 # Now specify a smaller subset of stochastic data to run (must be <= stoch years)
-sim_years = 3
+sim_years = 10
 
 # Run ORCA to get California storage dam releases
 import main
@@ -73,23 +83,23 @@ print('FCRPS')
 
 ## WIND
 # Specify installed capacity of wind power for each zone
-PNW_cap = 6445
-CAISO_cap = 4915
+#PNW_cap = 6445
+#CAISO_cap = 4915
 
 # Generate synthetic hourly wind power production time series for the BPA and
 # CAISO zones for the entire simulation period
 import wind_speed2_wind_power
-wind_speed2_wind_power.wind_sim(sim_years,PNW_cap,CAISO_cap)
+wind_speed2_wind_power.wind_sim(sim_years,PNW_wind_cap,CAISO_wind_cap)
 print('wind')
 
 # SOLAR
-# Specify installed capacity of wind power for each zone
-CAISO_solar_cap = 9890
+# Specify installed capacity of solar power for each zone
+#CAISO_solar_cap = 9890
 
 # Generate synthetic hourly solar power production time series for 
 # the CAISO zone for the entire simulation period
 import solar_production_simulation
-solar_production_simulation.solar_sim(sim_years,CAISO_solar_cap)
+solar_production_simulation.solar_sim(sim_years, PNW_solar_cap, CAISO_solar_cap)
 print('solar')
 ##############################################################################
 #

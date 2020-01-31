@@ -12,7 +12,7 @@ from statsmodels.tsa.arima_model import ARMA
 from datetime import datetime
 from datetime import timedelta
 
-def solar_sim(sim_years,cap):
+def solar_sim(sim_years, pnw_cap, caiso_cap):
     sim_years=sim_years+3
     df_CAISO = pd.read_excel('Synthetic_wind_power/renewables_2011_2017.xlsx',sheetname='CAISO',header=0)
     df_cap = pd.read_excel('Synthetic_wind_power/cap_by_month.xlsx',sheetname = 'solar',header=0)
@@ -240,7 +240,7 @@ def solar_sim(sim_years,cap):
            sim_hourly[i] = 1
            
     #multiply by installed capacity
-    solar_sim = sim_hourly*cap
+    solar_sim = sim_hourly*caiso_cap
     
     h = int(len(solar_sim))
     solar_sim = solar_sim[8760:h-2*8760,:]
