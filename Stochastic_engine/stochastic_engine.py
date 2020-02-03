@@ -98,8 +98,8 @@ print('wind')
 
 # Generate synthetic hourly solar power production time series for 
 # the CAISO zone for the entire simulation period
-import solar_production_simulation
-solar_production_simulation.solar_sim(sim_years, PNW_solar_cap, CAISO_solar_cap)
+import solar_production_simulation2
+solar_production_simulation2.solar_sim(sim_years, PNW_solar_cap, CAISO_solar_cap)
 print('solar')
 ##############################################################################
 #

@@ -12,7 +12,8 @@ from statsmodels.tsa.arima_model import ARMA
 from datetime import datetime
 from datetime import timedelta
 
-def solar_sim(sim_years,cap):
+def solar_sim(sim_years, PNW_solar_cap, CAISO_solar_cap):
+
     sim_years=sim_years+3
     df_CAISO = pd.read_excel('Synthetic_wind_power/renewables_2011_2017.xlsx',sheetname='CAISO',header=0)
     df_BPA = pd.read_excel('Synthetic_wind_power/renewables_2011_2017.xlsx',sheetname='BPA',header=0)
@@ -40,7 +41,7 @@ def solar_sim(sim_years,cap):
                 st_solar[year_index*8760 +j*24+5088+k,0] = df_CAISO.loc[year_index*8760 + j*24+5088+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==8),'CAISO']
                 st_solar[year_index*8760 +j*24+6552+k,0] = df_CAISO.loc[year_index*8760 + j*24+6552+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==10),'CAISO']
                 st_solar[year_index*8760 +j*24+8016+k,0] = df_CAISO.loc[year_index*8760 + j*24+8016+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==12),'CAISO']
-
+    
                 st_solar[year_index*8760 +j*24+k,1] = df_BPA.loc[year_index*8760 + j*24+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==1),'BPA']
                 st_solar[year_index*8760 +j*24+1416+k,1] = df_BPA.loc[year_index*8760 + j*24+1416+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==3),'BPA']
                 st_solar[year_index*8760 +j*24+2880+k,1] = df_BPA.loc[year_index*8760 + j*24+2880+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==5),'BPA']
@@ -56,7 +57,7 @@ def solar_sim(sim_years,cap):
                 st_solar[year_index*8760 +j*24+3624+k,0] = df_CAISO.loc[year_index*8760 + j*24+3624+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==6),'CAISO']
                 st_solar[year_index*8760 +j*24+5832+k,0] = df_CAISO.loc[year_index*8760 + j*24+5832+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==9),'CAISO']
                 st_solar[year_index*8760 +j*24+7296+k,0] = df_CAISO.loc[year_index*8760 + j*24+7296+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==11),'CAISO']
-
+    
                 st_solar[year_index*8760 +j*24+2160+k,1] = df_BPA.loc[year_index*8760 + j*24+2160+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==4),'BPA']
                 st_solar[year_index*8760 +j*24+3624+k,1] = df_BPA.loc[year_index*8760 + j*24+3624+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==6),'BPA']
                 st_solar[year_index*8760 +j*24+5832+k,1] = df_BPA.loc[year_index*8760 + j*24+5832+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==9),'BPA']
@@ -67,7 +68,7 @@ def solar_sim(sim_years,cap):
     
                 st_solar[year_index*8760 +j*24+744+k,0] = df_CAISO.loc[year_index*8760 + j*24+744+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==2),'CAISO']
                 st_solar[year_index*8760 +j*24+744+k,1] = df_BPA.loc[year_index*8760 + j*24+744+k,'solar']/df_cap.loc[(df_cap['Year']==i) & (df_cap['Month']==2),'BPA']
-   
+       
     st_solar=st_solar[35040:,:]
     daily_st_solar_CAISO=np.reshape(st_solar[:,0],(3*365,24))
     daily_st_solar_BPA=np.reshape(st_solar[:,1],(3*365,24))
@@ -104,7 +105,7 @@ def solar_sim(sim_years,cap):
     X['8']=np.sum(np.reshape(irrediance['Site8'].values[35040:],(3*365,24)),axis=1)
     X['9']=np.sum(np.reshape(irrediance['Site9'].values[35040:],(3*365,24)),axis=1)
     X['10']=np.sum(np.reshape(irrediance['Site10'].values[35040:],(3*365,24)),axis=1)
-   
+       
            
     
     for i in range(1,13):
@@ -116,7 +117,7 @@ def solar_sim(sim_years,cap):
     #    x=np.log(x+1)
         locals()[name]=linear_model.LinearRegression(fit_intercept=False)
         locals()[name].fit(x,y)
-#        print(locals()[name].score(x,y))
+    #        print(locals()[name].score(x,y))
         
     Syn_irr=pd.read_csv('Synthetic_weather/synthetic_irradiance_data.csv',header=0,index_col=0)
     Syn_irr = Syn_irr.loc[0:365*sim_years-1,:]
@@ -146,7 +147,7 @@ def solar_sim(sim_years,cap):
         predicted[i]=p
     residules= predicted - X['y'].values
     
-
+    
     predicted_sim=np.zeros(len(Syn_irr))
     for i in range(0,len(Syn_irr)):
         data=d_sim[i,:]
@@ -167,7 +168,7 @@ def solar_sim(sim_years,cap):
     y_seeds=residules[-7:]
     e=np.random.normal(np.mean(residules),np.std(residules),len(Syn_irr))
     
-
+    
     
     p=arma_fit1.params
     
@@ -239,15 +240,17 @@ def solar_sim(sim_years,cap):
                 days[j,i] = day
                 years[j,i] = year
             
-            sim_hourly[i*8760+j*24:i*8760+j*24+24] = st_solar[year*8760+day*24:year*8760+day*24+24,0]*(sim_solar[i*365+j]/daily[day,year])
-    
+            a = st_solar[year*8760+day*24:year*8760+day*24+24,0]*(sim_solar[i*365+j]/daily[day,year])
+            a = np.reshape(a,(24,1))
+            sim_hourly[i*8760+j*24:i*8760+j*24+24] = a
+            
     #impose maximum constraint
     for i in range(0,len(sim_hourly)):
        if sim_hourly[i] > 1:
            sim_hourly[i] = 1
            
     #multiply by installed capacity
-    solar_sim = sim_hourly*cap
+    solar_sim = sim_hourly*CAISO_solar_cap
     
     h = int(len(solar_sim))
     solar_sim = solar_sim[8760:h-2*8760,:]
@@ -281,7 +284,7 @@ def solar_sim(sim_years,cap):
     X['8']=np.sum(np.reshape(irrediance['Site8'].values[35040:],(3*365,24)),axis=1)
     X['9']=np.sum(np.reshape(irrediance['Site9'].values[35040:],(3*365,24)),axis=1)
     X['10']=np.sum(np.reshape(irrediance['Site10'].values[35040:],(3*365,24)),axis=1)
-   
+       
            
     
     for i in range(1,13):
@@ -293,7 +296,7 @@ def solar_sim(sim_years,cap):
     #    x=np.log(x+1)
         locals()[name]=linear_model.LinearRegression(fit_intercept=False)
         locals()[name].fit(x,y)
-#        print(locals()[name].score(x,y))
+    #        print(locals()[name].score(x,y))
         
     Syn_irr=pd.read_csv('Synthetic_weather/synthetic_irradiance_data.csv',header=0,index_col=0)
     Syn_irr = Syn_irr.loc[0:365*sim_years-1,:]
@@ -323,7 +326,7 @@ def solar_sim(sim_years,cap):
         predicted[i]=p
     residules= predicted - X['y'].values
     
-
+    
     predicted_sim=np.zeros(len(Syn_irr))
     for i in range(0,len(Syn_irr)):
         data=d_sim[i,:]
@@ -344,7 +347,7 @@ def solar_sim(sim_years,cap):
     y_seeds=residules[-7:]
     e=np.random.normal(np.mean(residules),np.std(residules),len(Syn_irr))
     
-
+    
     
     p=arma_fit1.params
     
@@ -416,8 +419,10 @@ def solar_sim(sim_years,cap):
                 days[j,i] = day
                 years[j,i] = year
             
-            st_solar_reshape = np.reshape(st_solar[:,1],(24,1))
-            sim_hourly[i*8760+j*24:i*8760+j*24+24] = st_solar_reshape*(sim_solar[i*365+j]/daily[day,year])
+            a = st_solar[year*8760+day*24:year*8760+day*24+24,1]*(sim_solar[i*365+j]/daily[day,year])
+            a = np.reshape(a,(24,1))
+            sim_hourly[i*8760+j*24:i*8760+j*24+24] = a
+    
     
     #impose maximum constraint
     for i in range(0,len(sim_hourly)):
@@ -425,7 +430,7 @@ def solar_sim(sim_years,cap):
            sim_hourly[i] = 1
            
     #multiply by installed capacity
-    solar_sim = sim_hourly*cap
+    solar_sim = sim_hourly*PNW_solar_cap
     
     h = int(len(solar_sim))
     solar_sim = solar_sim[8760:h-2*8760,:]

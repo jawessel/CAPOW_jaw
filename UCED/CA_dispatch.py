@@ -55,6 +55,12 @@ model.WECCImportsSDGE = Set()
 model.Ramping = model.Hydro | model.WECCImportsPGEV | model.WECCImportsSCE | model.WECCImportsSDGE
 model.Reserves = model.Hydro | model.Coal | model.Gas | model.Oil
 model.Generators = model.Zone1Generators | model.Zone2Generators | model.Zone3Generators | model.Zone4Generators | model.WECCImportsPGEV | model.WECCImportsSCE | model.WECCImportsSDGE
+model.Battery_Dis = Set()
+model.Battery_Stor = Set()
+# model.Zone1_Battery_Stor
+# model.Zone1_Battery_Dis, etc.
+
+model.Resources = model.Generators | model.Batteries
 
 #
 model.zones = Set()
@@ -70,7 +76,7 @@ model.sinks = Set(within=model.zones)
 model.typ = Param(model.Generators)
 
 #Zone parameters
-model.zone = Param(model.Generators)
+model.zone = Param(model.Resources)
 
 #Max Generating Capacity
 model.netcap = Param(model.Generators)
@@ -104,7 +110,16 @@ model.no_load  = Param(model.Generators)
 #Transmission Path parameters
 model.hurdle = Param(model.sources, model.sinks)
 model.limit = Param(model.sources, model.sinks)
-#
+
+#Battery parameters
+model.bat_cap = Param(model.Battery_Stor)
+model.bat_SoC = Param(model.Battery_Stor)
+model.bat_RoC = Param(model.Battery_Stor)
+
+model.bat_RoD = Param(model.Battery_Dis)
+model.bat_eff = Param(model.Batter_Dis)
+
+
 ###########################################################
 ### These are the detailed parameters for model runs      #
 ###########################################################
@@ -217,6 +232,12 @@ model.ini_mwh_3 = Param(model.Generators,initialize=0,mutable=True) #seg3
 model.mwh_1 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,initialize=0)
 model.mwh_2 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,initialize=0)
 model.mwh_3 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,initialize=0)
+
+
+#JAKE - define decision variables here
+model.bat_discharge = Var(model.Battery_Dis,model.HH_periods, within=NonNegativeReals,initialize=0)
+model.bat_charge = Var(model.Battery_Stor,model.HH_periods, within=NonNegativeReals,initialize=0)
+
 
 #1 if unit is on in hour i
 model.on = Var(model.Generators,model.HH_periods, within=Binary, initialize=0)
