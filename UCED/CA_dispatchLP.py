@@ -43,6 +43,11 @@ model.Zone4Gas = Set()
 model.Zone4Generators = Set()
 #PGE_bay
 
+model.Zone1Battery = Set()
+model.Zone2Battery = Set()
+model.Zone3Battery = Set()
+model.Zone4Battery = Set()
+
 model.Coal = Set()
 model.Gas = model.Zone1Gas | model.Zone2Gas | model.Zone3Gas | model.Zone4Gas
 model.Oil = Set()
@@ -55,9 +60,10 @@ model.WECCImportsSDGE = Set()
 model.Ramping = model.Hydro | model.WECCImportsPGEV | model.WECCImportsSCE | model.WECCImportsSDGE
 model.Reserves = model.Hydro | model.Coal | model.Gas | model.Oil
 model.Generators = model.Zone1Generators | model.Zone2Generators | model.Zone3Generators | model.Zone4Generators | model.WECCImportsPGEV | model.WECCImportsSCE | model.WECCImportsSDGE
+model.Batteries = model.Zone1Battery | model.Zone2Battery | model.Zone3Battery | model.Zone4Battery
 
 #
-model.zones =Set()
+model.zones = Set()
 model.sources = Set(within=model.zones)
 model.sinks = Set(within=model.zones)
 
@@ -104,7 +110,15 @@ model.no_load  = Param(model.Generators)
 #Transmission Path parameters
 model.hurdle = Param(model.sources, model.sinks)
 model.limit = Param(model.sources, model.sinks)
-#
+
+#Battery parameters
+model.bat_cap = Param(model.Batteries)
+model.bat_SoC = Param(model.Batteries, within=NonNegativeReals, initialize=0,mutable=True)
+model.bat_RoC = Param(model.Batteries)
+model.bat_RoD = Param(model.Batteries)
+model.bat_eff = Param(model.Batteries)
+
+
 ###########################################################
 ### These are the detailed parameters for model runs      #
 ###########################################################
@@ -209,6 +223,7 @@ model.ini_mwh_1 = Param(model.Generators,initialize=0,mutable=True) #seg1
 model.ini_mwh_2 = Param(model.Generators,initialize=0,mutable=True) #seg2
 model.ini_mwh_3 = Param(model.Generators,initialize=0,mutable=True) #seg3
 
+
 ###########################################################
 ### Decision variables                                    #
 ###########################################################
@@ -217,6 +232,15 @@ model.ini_mwh_3 = Param(model.Generators,initialize=0,mutable=True) #seg3
 model.mwh_1 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,initialize=0)
 model.mwh_2 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,initialize=0)
 model.mwh_3 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,initialize=0)
+
+
+#Battery decision variables
+model.bat_discharge = Var(model.Batteries,model.HH_periods, within=NonNegativeReals,initialize=0)
+model.bat_charge = Var(model.Batteries,model.HH_periods, within=NonNegativeReals,initialize=0)
+
+#Battery Binary Variables
+model.bat_dis_on = Var(model.Batteries,model.HH_periods, within=NonNegativeReals, initialize=0)
+model.bat_charge_on = Var(model.Batteries,model.HH_periods, within=NonNegativeReals, initialize=0)
 
 #1 if unit is on in hour i
 model.on = Var(model.Generators,model.HH_periods, within=NonNegativeReals, initialize=0)
@@ -306,7 +330,9 @@ def WECC1(model,i):
     renew = model.solar['PGE_valley',i]\
     + model.wind['PGE_valley',i] + model.PGEVH_minflow[i]
     must_run = model.HorizonMustRun['PGE_valley',i]
-    return s1 + s2 + s3 + renew + must_run >=  0.25*model.HorizonDemand['PGE_valley',i]
+    store = sum(model.bat_charge[j,i] for j in model.Zone1Battery)
+    discharge = sum(model.bat_discharge[j,i] for j in model.Zone1Battery)
+    return s1 + s2 + s3 + renew + must_run + discharge >=  0.25*model.HorizonDemand['PGE_valley',i] + store
 model.Local1= Constraint(model.hh_periods,rule=WECC1)
 ##
 def WECC2(model,i):
@@ -315,7 +341,9 @@ def WECC2(model,i):
     s3 = sum(model.mwh_3[j,i] for j in model.Zone2Generators)
     renew =  model.solar['PGE_bay',i] + model.wind['PGE_bay',i]
     must_run = model.HorizonMustRun['PGE_bay',i]
-    return s1 + s2 + s3 + renew + must_run >=  0.25*model.HorizonDemand['PGE_bay',i]
+    store = sum(model.bat_charge[j,i] for j in model.Zone2Battery)
+    discharge = sum(model.bat_discharge[j,i] for j in model.Zone2Battery)
+    return s1 + s2 + s3 + renew + must_run + discharge>=  0.25*model.HorizonDemand['PGE_bay',i] + store
 model.Local2= Constraint(model.hh_periods,rule=WECC2)
 ###
 def WECC3(model,i):
@@ -325,7 +353,9 @@ def WECC3(model,i):
     renew = model.solar['SCE',i]\
     + model.wind['SCE',i] + model.SCEH_minflow[i]
     must_run = model.HorizonMustRun['SCE',i]
-    return s1 + s2 + s3 + renew + must_run >=  0.25*model.HorizonDemand['SCE',i]
+    store = sum(model.bat_charge[j,i] for j in model.Zone3Battery)
+    discharge = sum(model.bat_discharge[j,i] for j in model.Zone3Battery)
+    return s1 + s2 + s3 + renew + must_run + discharge>=  0.25*model.HorizonDemand['SCE',i] + store
 model.Local3= Constraint(model.hh_periods,rule=WECC3)
 #
 def WECC4(model,i):
@@ -334,7 +364,9 @@ def WECC4(model,i):
     s3 = sum(model.mwh_3[j,i] for j in model.Zone4Generators)
     renew = model.solar['SDGE',i] + model.wind['SDGE',i]
     must_run = model.HorizonMustRun['SDGE',i]
-    return s1 + s2 + s3 + renew + must_run >=  0.25*model.HorizonDemand['SDGE',i]
+    store = sum(model.bat_charge[j,i] for j in model.Zone4Battery)
+    discharge = sum(model.bat_discharge[j,i] for j in model.Zone4Battery)
+    return s1 + s2 + s3 + renew + must_run + discharge >=  0.25*model.HorizonDemand['SDGE',i] + store
 model.Local4= Constraint(model.hh_periods,rule=WECC4)
 
 ###Power Balance
@@ -346,7 +378,9 @@ def Zone1_Balance(model,i):
     + model.wind['PGE_valley',i] + model.HorizonMustRun['PGE_valley',i]
     imports = sum(model.flow[s,'PGE_valley',i] for s in model.sources) + model.P66I_minflow[i] + model.mwh_1['P66I',i] + model.mwh_2['P66I',i] + model.mwh_3['P66I',i] + model.mwh_1['P24I',i] + model.mwh_2['P24I',i] + model.mwh_3['P24I',i]
     exports = sum(model.flow['PGE_valley',k,i] for k in model.sinks) + model.HorizonPath24_exports[i] + model.HorizonPath66_exports[i]
-    return s1 + s2 + s3 + other + imports - exports >= model.HorizonDemand['PGE_valley',i]
+    store = sum(model.bat_charge[j,i] for j in model.Zone1Battery)
+    discharge = sum(model.bat_discharge[j,i] for j in model.Zone1Battery)
+    return s1 + s2 + s3 + other + imports - exports + discharge >= model.HorizonDemand['PGE_valley',i] + store
 model.Bal1Constraint= Constraint(model.hh_periods,rule=Zone1_Balance)
 
 def Zone2_Balance(model,i):
@@ -357,7 +391,9 @@ def Zone2_Balance(model,i):
     + model.wind['PGE_bay',i] + model.HorizonMustRun['PGE_bay',i]
     imports = sum(model.flow[s,'PGE_bay',i] for s in model.sources)
     exports = sum(model.flow['PGE_bay',k,i] for k in model.sinks)
-    return s1 + s2 + s3 + other + imports - exports >= model.HorizonDemand['PGE_bay',i]
+    store = sum(model.bat_charge[j,i] for j in model.Zone2Battery)
+    discharge = sum(model.bat_discharge[j,i] for j in model.Zone2Battery)
+    return s1 + s2 + s3 + other + imports - exports + discharge >= model.HorizonDemand['PGE_bay',i] + store
 model.Bal2Constraint= Constraint(model.hh_periods,rule=Zone2_Balance)
 #
 def Zone3_Balance(model,i):
@@ -367,7 +403,9 @@ def Zone3_Balance(model,i):
     other = model.solar['SCE',i] + model.wind['SCE',i] + model.HorizonMustRun['SCE',i] + model.SCEH_minflow[i]
     imports = sum(model.flow[s,'SCE',i] for s in model.sources) + model.P46I_SCE_minflow[i] + model.mwh_1['P46I_SCE',i] + model.mwh_2['P46I_SCE',i] + model.mwh_3['P46I_SCE',i] + model.P61I_minflow[i] + model.mwh_1['P61I',i] + model.mwh_2['P61I',i] + model.mwh_3['P61I',i] + model.P42I_minflow[i] + model.mwh_1['P42I',i] + model.mwh_2['P42I',i] + model.mwh_3['P42I',i]
     exports = sum(model.flow['SCE',k,i] for k in model.sinks) + model.HorizonPath42_exports[i]
-    return s1 + s2 + s3 + other + imports - exports >= model.HorizonDemand['SCE',i]
+    store = sum(model.bat_charge[j,i] for j in model.Zone3Battery)
+    discharge = sum(model.bat_discharge[j,i] for j in model.Zone3Battery)
+    return s1 + s2 + s3 + other + imports - exports + discharge >= model.HorizonDemand['SCE',i] + store
 model.Bal3Constraint= Constraint(model.hh_periods,rule=Zone3_Balance)
 #
 def Zone4_Balance(model,i):
@@ -378,8 +416,48 @@ def Zone4_Balance(model,i):
     + model.wind['SDGE',i] + model.HorizonMustRun['SDGE',i]
     imports = sum(model.flow[s,'SDGE',i] for s in model.sources) + model.mwh_1['P46I_SDGE',i] + model.mwh_2['P46I_SDGE',i] + model.mwh_3['P46I_SDGE',i] + model.mwh_1['P45I',i] + model.mwh_2['P45I',i] + model.mwh_3['P45I',i]
     exports = sum(model.flow['SDGE',k,i] for k in model.sinks) + model.HorizonPath45_exports[i]
-    return s1 + s2 + s3 + other + imports - exports >= model.HorizonDemand['SDGE',i]
+    store = sum(model.bat_charge[j,i] for j in model.Zone4Battery)
+    discharge = sum(model.bat_discharge[j,i] for j in model.Zone4Battery)
+    return s1 + s2 + s3 + other + imports - exports + discharge >= model.HorizonDemand['SDGE',i] + store
 model.Bal4Constraint= Constraint(model.hh_periods,rule=Zone4_Balance)
+
+#Battery Storage Constraints
+
+#SoC Constraint, state of charge is always <= the battery's capacity
+def Battery1(model,j,i):
+    SoC = model.bat_SoC[j,i]
+    Cap = model.bat_cap[j]
+    return SoC <= Cap
+model.BatConstraint1 = Constraint(model.Batteries,model.hh_periods,rule=Battery1)
+
+#SoC Power Balance Constraint, keeps state of charge in balance after charging and discharging
+def Battery2(model,j,i):
+    SoC = model.bat_SoC[j,i]
+    SoC_tm1 = model.bat_SoC[j,i-1]
+    Charge = model.bat_charge[j,i]
+    Discharge = model.bat_discharge[j,i]
+    return SoC == SoC_tm1 + Charge*model.bat_eff[i] - Discharge
+model.BatConstraint2 = Constraint(model.Batteries, model.hh_periods, rule=Battery2)
+
+#Rate of Charge Constraint, total charge in one time step <= charge rate per hour
+def Battery3(model,j,i):
+    Charge = model.bat_charge[j,i]
+    return Charge <= model.bat_RoC[i] #* model.on[j,i]
+model.BatConstraint3 = Constraint(model.Batteries, model.hh_periods, rule=Battery3)
+
+#Rate of Discharge Constraint, total discharge in one time step <= discharge rate per hour
+def Battery4(model,j,i):
+    Discharge = model.bat_discharge[j,i]
+    return Discharge <= model.bat_RoD[j] #* model.on[j,i]
+model.BatConstraint4 = Constraint(model.Batteries, model.hh_periods, rule=Battery4)
+
+#Battery Binary Constraint, Cannot be Charging and Discharging in the same time step
+def Battery5(model,j,i):
+    On = model.bat_dis_on[j,i]
+    Off = model.bat_charge_on[j,i]
+    return On + Off <= 1
+model.BatConstraint5 = Constraint(model.Batteries, model.hh_periods, rule=Battery5)
+
 
 # Daily production limits on dispatchable hydropower
 def HydroC1(model,i):

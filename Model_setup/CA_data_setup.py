@@ -167,6 +167,15 @@ def setup(year,hist,hist_year):
                     f.write(unit_name + ' ')
             f.write(';\n\n')
 
+        # battery sets by zone
+        for z in zones:
+            # zone string
+            z_int = zones.index(z)
+            f.write('set Zone%dBattery :=\n' % (z_int+1))
+            unit_name = 'battery%d' % (z_int+1)
+            f.write(unit_name + ' ')
+            f.write(';\n\n')
+
         # WECC imports
         f.write('set WECCImportsSCE :=\n')
         # pull relevant generators
@@ -335,6 +344,7 @@ def setup(year,hist,hist_year):
                 else:
                     f.write('0' + '\t' + '0' + '\n')
         f.write(';\n\n')
+        
 
     # create parameter matrix for generators
         f.write('param:' + '\t')
@@ -353,7 +363,16 @@ def setup(year,hist,hist_year):
             f.write('\n')
 
         f.write(';\n\n')
-
+        
+        # create parameter matrix for batteries
+        
+        f.write('param:' + '\t' + 'bat_cap' + '\t' + 'bat_SoC' + '\t' + 'bat_RoC' + '\t' + 'bat_RoD' + '\t' + 'bat_eff' + ':=\n\n')
+        f.write('battery1' + '\t' + str(1000) + '\t' + str(0) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
+        f.write('battery2' + '\t' + str(1000) + '\t' + str(0) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
+        f.write('battery3' + '\t' + str(1000) + '\t' + str(0) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
+        f.write('battery4' + '\t' + str(1000) + '\t' + str(0) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
+        f.write(';\n\n')
+        
         # times series data
         # zonal (hourly)
         f.write('param:' + '\t' + 'SimDemand' + '\t' + 'SimWind' \

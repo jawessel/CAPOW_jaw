@@ -6,8 +6,8 @@ Created on Tue Jun 20 22:14:07 2017
 """
 
 from pyomo.opt import SolverFactory
-from CA_dispatch import model as m1
-from CA_dispatchLP import model as m2
+from CA_dispatch2 import model as m1
+from CA_dispatchLP2 import model as m2
 from pyomo.core import Var
 from pyomo.core import Constraint
 from pyomo.core import Param
@@ -26,10 +26,8 @@ def sim(days):
 
     instance2.dual = pyo.Suffix(direction=pyo.Suffix.IMPORT)
     opt = SolverFactory("cplex")
-
-
-
-
+    
+    
     H = instance.HorizonHours
     D = 2
     K=range(1,H+1)
@@ -48,6 +46,9 @@ def sim(days):
     flow=[]
     Generator=[]
     Duals=[]
+    battery_discharge = []
+    battery_charge = []
+    battery_state = []
     df_generators = pd.read_csv('generators.csv',header=0)
 
     #max here can be (1,365)
@@ -141,6 +142,23 @@ def sim(days):
                     instance2.switch[j,t] = 0
                     instance2.switch[j,t] = 0
                     instance2.switch[j,t].fixed = True
+                
+                if instance.battery_dis_on[j,t] == 1:
+                    instance2.battery_dis_on[j,t] = 1
+                    instance2.battery_dis_on[j,t].fixed = True                    
+                else:
+                    instance.battery_dis_on[j,t] = 0
+                    instance2.battery_dis_on[j,t] = 0
+                    instance2.battery_dis_on[j,t].fixed = True                    
+
+                if instance.battery_charge_on[j,t] == 1:
+                    instance2.battery_charge_on[j,t] = 1
+                    instance2.battery_charge_on[j,t].fixed = True                    
+                else:
+                    instance.battery_charge_on[j,t] = 0
+                    instance2.battery_charge_on[j,t] = 0
+                    instance2.battery_charge_on[j,t].fixed = True                      
+                    
         results = opt.solve(instance2)
         instance2.solutions.load_from(results)
 
