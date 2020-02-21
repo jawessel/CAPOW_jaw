@@ -5,6 +5,8 @@ Created on Wed Sep 19 09:59:48 2018
 @author: YSu
 """
 
+import pandas as pd
+
 ############################################################################
 # HISTORICAL WEATHER AND STREAMFLOW ANALYSIS
 
@@ -25,6 +27,9 @@ scenario = 'EV'
 year = 2020
 #This function specifies installed wind and solar capacity for each zone
 [CAISO_wind_cap, CAISO_solar_cap, PNW_wind_cap, PNW_solar_cap, EV_load] = scenario_chooser.choose(scenario, year)
+
+df_EV = pd.DataFrame(EV_load)
+df_EV.to_csv('EV_load.csv')
 
 ############################################################################
 # STOCHASTIC WEATHER AND STREAMFLOW GENERATION
@@ -51,7 +56,7 @@ print('streamflows')
 # DAILY HYDROPOWER SIMULATION
 
 # Now specify a smaller subset of stochastic data to run (must be <= stoch years)
-sim_years = 10
+sim_years = 2
 
 # Run ORCA to get California storage dam releases
 import main

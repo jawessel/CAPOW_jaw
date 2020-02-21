@@ -34,7 +34,7 @@ def wind_sim(sim_years, PNW_cap, CAISO_cap):
     df_BPA = pd.read_excel('Synthetic_wind_power/renewables_2011_2017.xlsx',sheet_name='BPA',header=0)
     df_CAISO = pd.read_excel('Synthetic_wind_power/renewables_2011_2017.xlsx',sheet_name='CAISO',header=0)
     
-    BPA = df_BPA.values
+    BPA = df_BPA.loc[:,:'wind'].values
     CAISO = df_CAISO.loc[:,'wind'].values
     
     # form a single matrix, and select only 2013-2017 data

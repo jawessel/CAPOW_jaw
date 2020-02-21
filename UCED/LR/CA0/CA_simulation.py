@@ -16,7 +16,7 @@ Created on Mon Oct  8 11:45:39 2018
 ############################################################################
 # Simulates power system operations for as many simulation days as
 # specified (max is 365)
-days = 1
+days = 10
 
 # CALIFORNIA
 import CA_wrapper
@@ -26,8 +26,8 @@ CA_wrapper.sim(days)
 ############################################################################
 #                    WHOLESALE ELECTRICITY PRICES
 #
-import CA_price_calculation
-#import emission_calculation
+#import CA_price_calculation
+import CA_emission_calculation
 
 # Prices in California need to be translated to a CAISO average price from
 # prices at the four zones. This is done using a regression among historical

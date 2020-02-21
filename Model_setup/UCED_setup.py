@@ -38,12 +38,10 @@ import numpy as np
 
 # Run the following lines if you want to select a random year from the synthetic record
 #to be run through the UC/ED model.
-# df_sim = pd.read_excel('../Stochastic_engine/CA_hydropower/CA_hydro_daily.xlsx')
-# sim_years = len(df_sim)/365
+df_sim = pd.read_excel('../Stochastic_engine/CA_hydropower/CA_hydro_daily.xlsx')
+sim_years = len(df_sim)/365
 # year = np.random.uniform(0,1,1)*sim_years
 # year = int(np.floor(year))
-
-sim_years=3
 
 for i in range(0,int(sim_years)):
     year=int(i)

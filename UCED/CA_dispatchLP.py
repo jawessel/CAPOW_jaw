@@ -111,14 +111,6 @@ model.no_load  = Param(model.Generators)
 model.hurdle = Param(model.sources, model.sinks)
 model.limit = Param(model.sources, model.sinks)
 
-#Battery parameters
-model.bat_cap = Param(model.Batteries)
-model.bat_SoC = Param(model.Batteries, within=NonNegativeReals, initialize=0,mutable=True)
-model.bat_RoC = Param(model.Batteries)
-model.bat_RoD = Param(model.Batteries)
-model.bat_eff = Param(model.Batteries)
-
-
 ###########################################################
 ### These are the detailed parameters for model runs      #
 ###########################################################
@@ -139,6 +131,12 @@ model.h1_periods = RangeSet(1,24)
 model.h2_periods = RangeSet(25,48)
 model.ramp1_periods = RangeSet(2,24)
 model.ramp2_periods = RangeSet(26,48)
+
+#Battery parameters
+model.bat_cap = Param(model.Batteries)
+model.bat_RoC = Param(model.Batteries)
+model.bat_RoD = Param(model.Batteries)
+model.bat_eff = Param(model.Batteries)
 
 #Demand over simulation period
 model.SimDemand = Param(model.zones*model.SH_periods, within=NonNegativeReals)
@@ -237,6 +235,7 @@ model.mwh_3 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,ini
 #Battery decision variables
 model.bat_discharge = Var(model.Batteries,model.HH_periods, within=NonNegativeReals,initialize=0)
 model.bat_charge = Var(model.Batteries,model.HH_periods, within=NonNegativeReals,initialize=0)
+model.bat_SoC = Var(model.Batteries, model.HH_periods, within=NonNegativeReals, initialize=0)
 
 #Battery Binary Variables
 model.bat_dis_on = Var(model.Batteries,model.HH_periods, within=NonNegativeReals, initialize=0)
@@ -436,13 +435,13 @@ def Battery2(model,j,i):
     SoC_tm1 = model.bat_SoC[j,i-1]
     Charge = model.bat_charge[j,i]
     Discharge = model.bat_discharge[j,i]
-    return SoC == SoC_tm1 + Charge*model.bat_eff[i] - Discharge
+    return SoC <= SoC_tm1 + Charge*model.bat_eff[j] - Discharge
 model.BatConstraint2 = Constraint(model.Batteries, model.hh_periods, rule=Battery2)
 
 #Rate of Charge Constraint, total charge in one time step <= charge rate per hour
 def Battery3(model,j,i):
     Charge = model.bat_charge[j,i]
-    return Charge <= model.bat_RoC[i] #* model.on[j,i]
+    return Charge <= model.bat_RoC[j] #* model.on[j,i]
 model.BatConstraint3 = Constraint(model.Batteries, model.hh_periods, rule=Battery3)
 
 #Rate of Discharge Constraint, total discharge in one time step <= discharge rate per hour

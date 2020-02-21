@@ -141,14 +141,16 @@ def setup(year,hist,hist_year):
     dispatchLP_file='../UCED/CA_dispatchLP.py'
     wrapper_file='../UCED/CA_wrapper.py'
     simulation_file='../UCED/CA_simulation.py'
-    price_cal_file='../UCED/CA_price_calculation.py'
+    emission_cal_file='../UCED/CA_emission_calculation.py'
+    emission_gen_file = '../UCED/CA_emissions_generator.csv'
 
     copy(dispatch_file,path)
     copy(wrapper_file,path)
     copy(simulation_file,path)
-    copy(price_cal_file,path)
+    copy(emission_cal_file,path)
     copy(dispatchLP_file,path)
     copy(generators_file,path)
+    copy(emission_gen_file,path)
 
 
     filename = path + '/data.dat'
@@ -366,11 +368,11 @@ def setup(year,hist,hist_year):
         
         # create parameter matrix for batteries
         
-        f.write('param:' + '\t' + 'bat_cap' + '\t' + 'bat_SoC' + '\t' + 'bat_RoC' + '\t' + 'bat_RoD' + '\t' + 'bat_eff' + ':=\n\n')
-        f.write('battery1' + '\t' + str(1000) + '\t' + str(0) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
-        f.write('battery2' + '\t' + str(1000) + '\t' + str(0) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
-        f.write('battery3' + '\t' + str(1000) + '\t' + str(0) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
-        f.write('battery4' + '\t' + str(1000) + '\t' + str(0) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
+        f.write('param:' + '\t' + 'bat_cap' + '\t' + 'bat_RoC' + '\t' + 'bat_RoD' + '\t' + 'bat_eff' + ':=\n\n')
+        f.write('battery1' + '\t' + str(1000) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
+        f.write('battery2' + '\t' + str(1000) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
+        f.write('battery3' + '\t' + str(1000) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
+        f.write('battery4' + '\t' + str(1000) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
         f.write(';\n\n')
         
         # times series data

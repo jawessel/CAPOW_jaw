@@ -89,15 +89,17 @@ def setup(year):
     dispatchLP_file='../UCED/PNW_dispatchLP.py'
     wrapper_file='../UCED/PNW_wrapper.py'
     simulation_file='../UCED/PNW_simulation.py'
-    price_cal_file='../UCED/PNW_price_calculation.py'
+    emission_cal_file='../UCED/PNW_emission_calculation.py'
+    emission_gen_file = '../UCED/PNW_emissions_generator.csv'
 
 
     copy(dispatch_file,path)
     copy(wrapper_file,path)
     copy(simulation_file,path)
-    copy(price_cal_file,path)
+    copy(emission_cal_file,path)
     copy(dispatchLP_file,path)
     copy(generators_file,path)
+    copy(emission_gen_file,path)
 
 
     filename = path + '/data.dat'

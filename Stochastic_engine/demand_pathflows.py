@@ -23,6 +23,8 @@ df_load = pd.read_excel('Synthetic_demand_pathflows/hist_demanddata.xlsx',sheet_
 df_weather = pd.read_excel('Synthetic_demand_pathflows/hist_demanddata.xlsx',sheet_name='weather',header=0)
 BPA_weights = pd.read_excel('Synthetic_demand_pathflows/hist_demanddata.xlsx',sheet_name='BPA_location_weights',header=0)
 CAISO_weights = pd.read_excel('Synthetic_demand_pathflows/hist_demanddata.xlsx',sheet_name='CAISO_location_weights',header=0)
+df_EV = pd.read_csv('EV_load.csv',header=0,index_col=0)
+EV_load = df_EV.values
 
 Name_list=pd.read_csv('Synthetic_demand_pathflows/Covariance_Calculation.csv')
 Name_list=list(Name_list.loc['SALEM_T':])
@@ -2742,23 +2744,23 @@ for i in range(0,effect_sim_year):
     for j in range(0,365):
         v = syn_BPA[i*365+j]*BPA_profile[:,j]
         a = np.reshape(v,(24,1))
-        BPA_hourly[i*8760+24*j:i*8760+24*j+24] = a + EV_load[:,1]
+        BPA_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load[:,1],(24,1))
         
         v = syn_SDGE[i*365+j]*SDGE_profile[:,j]
         a = np.reshape(v,(24,1))
-        SDGE_hourly[i*8760+24*j:i*8760+24*j+24] = a + EV_load[:,0]*0.09196 #scale factor is proportional load of each zone to CA as a whole
+        SDGE_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load[:,0],(24,1))*0.09196 #scale factor is proportional load of each zone to CA as a whole
         
         v = syn_SCE[i*365+j]*SCE_profile[:,j]
         a = np.reshape(v,(24,1))
-        SCE_hourly[i*8760+24*j:i*8760+24*j+24] = a + EV_load[:,0]*0.46037
+        SCE_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load[:,0],(24,1))*0.46037
         
         v = syn_PGEV[i*365+j]*PGEV_profile[:,j]
         a = np.reshape(v,(24,1))
-        PGEV_hourly[i*8760+24*j:i*8760+24*j+24] = a + EV_load[:,0]*0.25528
+        PGEV_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load[:,0],(24,1))*0.25528
         
         v = syn_PGEB[i*365+j]*PGEB_profile[:,j]
         a = np.reshape(v,(24,1))
-        PGEB_hourly[i*8760+24*j:i*8760+24*j+24] = a + EV_load[:,0]*0.19239
+        PGEB_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load[:,0],(24,1))*0.19239
             
 #Scale BPA demand up to PNW region wide total
 import PNW_demand_scaling

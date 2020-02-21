@@ -16,18 +16,11 @@ Created on Mon Oct  8 11:45:39 2018
 ############################################################################
 # Simulates power system operations for as many simulation days as
 # specified (max is 365)
-days = 2
+days = 365
 
-# CALIFORNIA
-#import CA_wrapper
-#CA_wrapper.sim(days)
 
 # PACIFIC NORTHWEST
 import PNW_wrapper
 PNW_wrapper.sim(days)
 
-############################################################################
-#                    WHOLESALE ELECTRICITY PRICES
-#
-
-import PNW_price_calculation
+import PNW_emission_calculation
