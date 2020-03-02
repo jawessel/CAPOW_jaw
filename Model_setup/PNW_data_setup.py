@@ -13,6 +13,9 @@ def setup(year):
     #read generator parameters into DataFrame
     df_gen = pd.read_csv('PNW_data_file/generators.csv',header=0)
 
+    #read in battery parameters (specified in scenario_chooser.py)
+    df_bat_params = pd.read_excel('scenario_parameters.xlsx',sheet_name = 'Capacities', index_col=0)
+
     zone = ['PNW']
     ##time series of load for each zone
     df_load = pd.read_csv('../Stochastic_engine/Synthetic_demand_pathflows/Sim_hourly_load.csv',header=0)
@@ -116,6 +119,15 @@ def setup(year):
                     unit_name = df_gen.loc[gen,'name']
                     unit_name = unit_name.replace(' ','_')
                     f.write(unit_name + ' ')
+            f.write(';\n\n')
+            
+         # battery sets by zone
+        for z in zones:
+            # zone string
+            z_int = zones.index(z)
+            f.write('set Zone%dBattery :=\n' % (z_int+1))
+            unit_name = 'battery%d' % (z_int+1)
+            f.write(unit_name + ' ')
             f.write(';\n\n')
 
         # WECC imports
@@ -263,6 +275,12 @@ def setup(year):
                     f.write(str((df_gen.loc[i,c])) + '\t')
             f.write('\n')
 
+        f.write(';\n\n')
+        
+        # create parameter matrix for batteries
+        
+        f.write('param:' + '\t' + 'bat_cap' + '\t' + 'bat_RoC' + '\t' + 'bat_RoD' + '\t' + 'bat_eff' + ':=\n\n')
+        f.write('battery5' + '\t' + str(df_bat_params.loc['PNW_bat_cap', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoC', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoD', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
         f.write(';\n\n')
 
         # times series data

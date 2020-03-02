@@ -58,7 +58,9 @@ def sim(days):
     flow=[]
     Generator=[]
     Duals=[]
-    
+    battery_discharge = []
+    battery_charge = []
+    battery_state = []
     df_generators = pd.read_csv('generators.csv',header=0)
     
     instance.ini_on["COLUMBIA_2"] = 1
@@ -136,6 +138,40 @@ def sim(days):
             instance2.HorizonPath65_minflow[i] = instance2.SimPath65_imports_minflow[(day-1)*24+i]  
             instance2.HorizonPath66_minflow[i] = instance2.SimPath66_imports_minflow[(day-1)*24+i]  
             instance2.HorizonPNW_hydro_minflow[i] = instance2.SimPNW_hydro_minflow[(day-1)*24+i]
+        for j in instance.Generators:
+            for t in K:
+                if instance.on[j,t] == 1:
+                    instance2.on[j,t] = 1
+                    instance2.on[j,t].fixed = True
+                else:
+                    instance.on[j,t] = 0
+                    instance2.on[j,t] = 0
+                    instance2.on[j,t].fixed = True
+
+                if instance.switch[j,t] == 1:
+                    instance2.switch[j,t] = 1
+                    instance2.switch[j,t].fixed = True
+                else:
+                    instance2.switch[j,t] = 0
+                    instance2.switch[j,t] = 0
+                    instance2.switch[j,t].fixed = True
+        for j in instance.Zone5Battery:
+            for t in K:
+                if instance.bat_dis_on[j,t] == 1:
+                    instance2.bat_dis_on[j,t] = 1
+                    instance2.bat_dis_on[j,t].fixed = True                    
+                else:
+                    instance.bat_dis_on[j,t] = 0
+                    instance2.bat_dis_on[j,t] = 0
+                    instance2.bat_dis_on[j,t].fixed = True                    
+
+                if instance.bat_charge_on[j,t] == 1:
+                    instance2.bat_charge_on[j,t] = 1
+                    instance2.bat_charge_on[j,t].fixed = True                    
+                else:
+                    instance.bat_charge_on[j,t] = 0
+                    instance2.bat_charge_on[j,t] = 0
+                    instance2.bat_charge_on[j,t].fixed = True                      
     #            
         results = opt.solve(instance2)
         instance2.solutions.load_from(results)   
@@ -289,7 +325,27 @@ def sim(days):
                 if index[0] in instance.Zone5Generators:
                  on.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
                  
-          
+            if a == 'bat_discharge':
+                
+                for index in varobject:
+                    if int(index[1]>0 and index[1]<25):
+                        if index[0] in instance.Zone5Battery:
+                            battery_discharge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
+
+            if a == 'bat_charge':
+                
+                for index in varobject:
+                    if int(index[1]>0 and index[1]<25):
+                        if index[0] in instance.Zone5Battery:
+                            battery_charge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
+
+
+            if a == 'bat_SoC':
+                
+                for index in varobject:
+                    if int(index[1]>0 and index[1]<25):
+                        if index[0] in instance.Zone5Battery:
+                            battery_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
              
             if a=='switch':
             
@@ -380,12 +436,25 @@ def sim(days):
                 instance.nrsv[j,0] = newval_nrsv 
                 instance.nrsv[j,0].fixed = True        
                    
+            for j in instance.Zone5Battery:
+                              
+                if instance.bat_SoC[j,24].value <=0 and instance.bat_SoC[j,24].value>= -0.0001:
+                    newval_1=0
+                else:
+                    newval_1=instance.bat_SoC[j,24].value
+
+                instance.bat_SoC[j,0] = newval_1
+                instance.bat_SoC[j,0].fixed = True
+            
         print(day)
     
     mwh_1_pd=pd.DataFrame(mwh_1,columns=('Generator','Time','Value','Zones','Type','$/MWh'))
     mwh_2_pd=pd.DataFrame(mwh_2,columns=('Generator','Time','Value','Zones','Type','$/MWh'))
     mwh_3_pd=pd.DataFrame(mwh_3,columns=('Generator','Time','Value','Zones','Type','$/MWh'))
     on_pd=pd.DataFrame(on,columns=('Generator','Time','Value','Zones'))
+    battery_charge_pd = pd.DataFrame(battery_charge, columns=('Generator','Time','Value','Zones'))
+    battery_discharge_pd = pd.DataFrame(battery_discharge, columns=('Generator','Time','Value','Zones'))
+    battery_state_pd = pd.DataFrame(battery_state, columns=('Generator','Time','Value','Zones'))    
     switch_pd=pd.DataFrame(switch,columns=('Generator','Time','Value','Zones'))
     srsv_pd=pd.DataFrame(srsv,columns=('Generator','Time','Value','Zones'))
     nrsv_pd=pd.DataFrame(nrsv,columns=('Generator','Time','Value','Zones'))
@@ -397,6 +466,9 @@ def sim(days):
     mwh_2_pd.to_csv('mwh_2.csv')
     mwh_3_pd.to_csv('mwh_3.csv')
     on_pd.to_csv('on.csv')
+    battery_charge_pd.to_csv('battery_charge.csv')
+    battery_discharge_pd.to_csv('battery_discharge.csv')
+    battery_state_pd.to_csv('battery_state.csv')
     switch_pd.to_csv('switch.csv')
     srsv_pd.to_csv('srsv.csv')
     nrsv_pd.to_csv('nrsv.csv')

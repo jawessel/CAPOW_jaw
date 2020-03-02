@@ -76,7 +76,7 @@ def exchange(year):
     df_data = df_data[c]
     df_data.columns = [paths]
     df_data = df_data.loc[year*365:year*365+364,:]
-    df_data = df_data.reset_index()
+    df_data = df_data.reset_index(drop=True)
     
     e = np.zeros((8760,5))
     
@@ -88,8 +88,9 @@ def exchange(year):
         pp = path_profiles.values
         
         if p=='Path3' or p=='Path65' or p=='Path66':   #SCRIPT ASSUMPTION: NEGATIVE = EXPORT. revert sign when needed
-                df_data.loc[:,p]=-df_data.loc[:,p]
-    
+                for j in range(0,len(df_data)):
+                    df_data.loc[j,p]=df_data.loc[j,p]*-1
+                    
         for i in range(0,len(df_data)):
             if df_data.loc[i,p].values < 0:
                 e[i*24:i*24+24,p_index] = pp[i,:]*-df_data.loc[i,p].values
@@ -115,7 +116,7 @@ def exchange(year):
     hydro = df_data.loc[year*365:year*365+364,'PNW']
     hydro = hydro.reset_index()
     df_mins = pd.read_excel('Hydro_setup/Minimum_hydro_profiles.xlsx',header=0)
-   
+       
     for i in range(0,len(hydro)):
     
         if df_mins.loc[i,'PNW']*24 >= hydro.loc[i,'PNW']:

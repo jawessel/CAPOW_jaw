@@ -15,9 +15,9 @@ from datetime import timedelta
 def solar_sim(sim_years, PNW_solar_cap, CAISO_solar_cap):
 
     sim_years=sim_years+3
-    df_CAISO = pd.read_excel('Synthetic_wind_power/renewables_2011_2017.xlsx',sheetname='CAISO',header=0)
-    df_BPA = pd.read_excel('Synthetic_wind_power/renewables_2011_2017.xlsx',sheetname='BPA',header=0)
-    df_cap = pd.read_excel('Synthetic_wind_power/cap_by_month.xlsx',sheetname = 'solar',header=0)
+    df_CAISO = pd.read_excel('Synthetic_wind_power/renewables_2011_2017.xlsx',sheet_name='CAISO',header=0)
+    df_BPA = pd.read_excel('Synthetic_wind_power/renewables_2011_2017.xlsx',sheet_name='BPA',header=0)
+    df_cap = pd.read_excel('Synthetic_wind_power/cap_by_month.xlsx',sheet_name = 'solar',header=0)
     
     years = range(2011,2018)
     

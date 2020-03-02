@@ -16,6 +16,9 @@ def setup(year,hist,hist_year):
     #read generator parameters into DataFrame
     df_gen = pd.read_csv('CA_data_file/generators.csv',header=0)
 
+    #read in battery parameters (specified in scenario_chooser.py)
+    df_bat_params = pd.read_excel('scenario_parameters.xlsx',sheet_name = 'Capacities', index_col=0)
+
     #read transmission path parameters into DataFrame
     df_paths = pd.read_csv('CA_data_file/paths.csv',header=0)
 
@@ -369,10 +372,10 @@ def setup(year,hist,hist_year):
         # create parameter matrix for batteries
         
         f.write('param:' + '\t' + 'bat_cap' + '\t' + 'bat_RoC' + '\t' + 'bat_RoD' + '\t' + 'bat_eff' + ':=\n\n')
-        f.write('battery1' + '\t' + str(1000) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
-        f.write('battery2' + '\t' + str(1000) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
-        f.write('battery3' + '\t' + str(1000) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
-        f.write('battery4' + '\t' + str(1000) + '\t' + str(200) + '\t' + str(200) + '\t' + str(0.85) + '\n')
+        f.write('battery1' + '\t' + str(df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.25) + '\t' + str(df_bat_params.loc['bat_RoC', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoD', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
+        f.write('battery2' + '\t' + str(df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.25) + '\t' + str(df_bat_params.loc['bat_RoC', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoD', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
+        f.write('battery3' + '\t' + str(df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.25) + '\t' + str(df_bat_params.loc['bat_RoC', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoD', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
+        f.write('battery4' + '\t' + str(df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.25) + '\t' + str(df_bat_params.loc['bat_RoC', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoD', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
         f.write(';\n\n')
         
         # times series data

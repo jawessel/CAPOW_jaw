@@ -18,18 +18,17 @@ starttime = time.time()
 #import calculate_cov
 ############################################################################
 
-import scenario_chooser
-# Input scenario and year to run
-#Scenarios: 'MID' = Mid-Case, 'EV' = High EV Adoption, 'BAT' = Low Battery Storage Cost
-#   'LOWRECOST' = Low RE Cost, 'HIGHRECOST' = High RE Cost
-#Years: 2020 - 2050
-scenario = 'EV'
-year = 2020
-#This function specifies installed wind and solar capacity for each zone
-[CAISO_wind_cap, CAISO_solar_cap, PNW_wind_cap, PNW_solar_cap, EV_load] = scenario_chooser.choose(scenario, year)
+import pandas as pd
+#import scenario parameters here
+capacities = pd.read_excel('scenario_parameters.xlsx',sheet_name = 'Capacities', index_col=0)
+CAISO_wind_cap = capacities.loc[('CAISO_wind_cap'),'Value (MW)']
+CAISO_solar_cap = capacities.loc[('CAISO_solar_cap'),'Value (MW)']
+PNW_wind_cap = capacities.loc[('PNW_wind_cap'), 'Value (MW)']
+PNW_solar_cap = capacities.loc[('PNW_solar_cap'), 'Value (MW)']
+ev_profiles = pd.read_excel('scenario_parameters.xlsx',sheet_name = 'EV Load Profiles', index_col=0)
 
-df_EV = pd.DataFrame(EV_load)
-df_EV.to_csv('EV_load.csv')
+#write EV Load profiles to csv to be used elsewhere
+ev_profiles.to_csv('EV_load.csv')
 
 ############################################################################
 # STOCHASTIC WEATHER AND STREAMFLOW GENERATION
