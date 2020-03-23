@@ -704,7 +704,6 @@ def sim(days):
 
             for j in instance.Batteries:
                               
-
                 if instance.bat_SoC[j,24].value <=0 and instance.bat_SoC[j,24].value>= -0.0001:
                     newval_1=0
                 else:

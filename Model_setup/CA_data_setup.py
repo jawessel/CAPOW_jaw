@@ -17,7 +17,7 @@ def setup(year,hist,hist_year):
     df_gen = pd.read_csv('CA_data_file/generators.csv',header=0)
 
     #read in battery parameters (specified in scenario_chooser.py)
-    df_bat_params = pd.read_excel('scenario_parameters.xlsx',sheet_name = 'Capacities', index_col=0)
+    df_bat_params = pd.read_excel('../Stochastic_engine/scenario_parameters.xlsx',sheet_name = 'Capacities', index_col=0)
 
     #read transmission path parameters into DataFrame
     df_paths = pd.read_csv('CA_data_file/paths.csv',header=0)
@@ -146,6 +146,7 @@ def setup(year,hist,hist_year):
     simulation_file='../UCED/CA_simulation.py'
     emission_cal_file='../UCED/CA_emission_calculation.py'
     emission_gen_file = '../UCED/CA_emissions_generator.csv'
+    scenario_param_file = '../Stochastic_engine/scenario_parameters.xlsx'
 
     copy(dispatch_file,path)
     copy(wrapper_file,path)
@@ -154,7 +155,7 @@ def setup(year,hist,hist_year):
     copy(dispatchLP_file,path)
     copy(generators_file,path)
     copy(emission_gen_file,path)
-
+    copy(scenario_param_file,path)
 
     filename = path + '/data.dat'
     with open(filename, 'w') as f:
@@ -372,11 +373,12 @@ def setup(year,hist,hist_year):
         # create parameter matrix for batteries
         
         f.write('param:' + '\t' + 'bat_cap' + '\t' + 'bat_RoC' + '\t' + 'bat_RoD' + '\t' + 'bat_eff' + ':=\n\n')
-        f.write('battery1' + '\t' + str(df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.25) + '\t' + str(df_bat_params.loc['bat_RoC', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoD', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
-        f.write('battery2' + '\t' + str(df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.25) + '\t' + str(df_bat_params.loc['bat_RoC', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoD', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
-        f.write('battery3' + '\t' + str(df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.25) + '\t' + str(df_bat_params.loc['bat_RoC', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoD', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
-        f.write('battery4' + '\t' + str(df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.25) + '\t' + str(df_bat_params.loc['bat_RoC', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoD', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
+        f.write('battery1' + '\t' + str(df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.09196) + '\t' + str(df_bat_params.loc['bat_RoC_coeff', 'Value (MW)']*df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.09196) + '\t' + str(df_bat_params.loc['bat_RoD_coeff', 'Value (MW)']*df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.09196) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
+        f.write('battery2' + '\t' + str(df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.46037) + '\t' + str(df_bat_params.loc['bat_RoC_coeff', 'Value (MW)']*df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.46037) + '\t' + str(df_bat_params.loc['bat_RoD_coeff', 'Value (MW)']*df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.46037) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
+        f.write('battery3' + '\t' + str(df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.25528) + '\t' + str(df_bat_params.loc['bat_RoC_coeff', 'Value (MW)']*df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.25528) + '\t' + str(df_bat_params.loc['bat_RoD_coeff', 'Value (MW)']*df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.25528) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
+        f.write('battery4' + '\t' + str(df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.19239) + '\t' + str(df_bat_params.loc['bat_RoC_coeff', 'Value (MW)']*df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.19239) + '\t' + str(df_bat_params.loc['bat_RoD_coeff', 'Value (MW)']*df_bat_params.loc['CAISO_bat_cap', 'Value (MW)']*0.19239) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
         f.write(';\n\n')
+        #scale factor for capacity is proportional load of each zone to CA as a whole
         
         # times series data
         # zonal (hourly)

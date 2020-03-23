@@ -14,7 +14,7 @@ def setup(year):
     df_gen = pd.read_csv('PNW_data_file/generators.csv',header=0)
 
     #read in battery parameters (specified in scenario_chooser.py)
-    df_bat_params = pd.read_excel('scenario_parameters.xlsx',sheet_name = 'Capacities', index_col=0)
+    df_bat_params = pd.read_excel('../Stochastic_engine/scenario_parameters.xlsx',sheet_name = 'Capacities', index_col=0)
 
     zone = ['PNW']
     ##time series of load for each zone
@@ -94,7 +94,7 @@ def setup(year):
     simulation_file='../UCED/PNW_simulation.py'
     emission_cal_file='../UCED/PNW_emission_calculation.py'
     emission_gen_file = '../UCED/PNW_emissions_generator.csv'
-
+    scenario_param_file = '../Stochastic_engine/scenario_parameters.xlsx'
 
     copy(dispatch_file,path)
     copy(wrapper_file,path)
@@ -103,6 +103,7 @@ def setup(year):
     copy(dispatchLP_file,path)
     copy(generators_file,path)
     copy(emission_gen_file,path)
+    copy(scenario_param_file,path)
 
 
     filename = path + '/data.dat'
@@ -123,10 +124,8 @@ def setup(year):
             
          # battery sets by zone
         for z in zones:
-            # zone string
-            z_int = zones.index(z)
-            f.write('set Zone%dBattery :=\n' % (z_int+1))
-            unit_name = 'battery%d' % (z_int+1)
+            f.write('set Zone5Battery :=\n')
+            unit_name = 'battery5'
             f.write(unit_name + ' ')
             f.write(';\n\n')
 
@@ -280,7 +279,7 @@ def setup(year):
         # create parameter matrix for batteries
         
         f.write('param:' + '\t' + 'bat_cap' + '\t' + 'bat_RoC' + '\t' + 'bat_RoD' + '\t' + 'bat_eff' + ':=\n\n')
-        f.write('battery5' + '\t' + str(df_bat_params.loc['PNW_bat_cap', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoC', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoD', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
+        f.write('battery5' + '\t' + str(df_bat_params.loc['PNW_bat_cap', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoC_coeff', 'Value (MW)']*df_bat_params.loc['PNW_bat_cap', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_RoD_coeff', 'Value (MW)']*df_bat_params.loc['PNW_bat_cap', 'Value (MW)']) + '\t' + str(df_bat_params.loc['bat_eff', 'Value (MW)']) + '\n')
         f.write(';\n\n')
 
         # times series data

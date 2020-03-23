@@ -18,11 +18,12 @@ import numpy as np
 #   'LOWRECOST' = Low RE Cost, 'HIGHRECOST' = High RE Cost
 #Years: 2020 - 2050
 scenario = 'MID'
-year = 2050
+year = 2025
+identifier = pd.DataFrame([scenario, str(year)])
 
 #Specify battery rate of charge, rate of discharge, and efficiency
-bat_RoC = 200 #(MW/hour)
-bat_RoD = 200 #(MW/hour)
+bat_RoC_coeff = 0.2 #fraction of capacity (multiplied by capacities in setup file)
+bat_RoD_coeff = 0.8 #fraction of capacity (multiplied by capacities in setup file)
 bat_eff = 0.85
 
 
@@ -67,10 +68,15 @@ elif(year % 2 != 0):
     PNW_wind_cap = (sums.loc[(scenario, 'WA', 'WIND', year+1), 'Capacity']*1000*frac.loc[('WA','WIND'), 'Fraction'] + sums.loc[(scenario, 'OR', 'WIND', year+1), 'Capacity']*1000*frac.loc[('OR','WIND'), 'Fraction'] + sums.loc[(scenario, 'ID', 'WIND', year+1), 'Capacity']*1000*frac.loc[('ID','WIND'), 'Fraction'] + sums.loc[(scenario, 'WA', 'WIND', year-1), 'Capacity']*1000*frac.loc[('WA','WIND'), 'Fraction'] + sums.loc[(scenario, 'OR', 'WIND', year-1), 'Capacity']*1000*frac.loc[('OR','WIND'), 'Fraction'] + sums.loc[(scenario, 'ID', 'WIND', year-1), 'Capacity']*1000*frac.loc[('ID','WIND'), 'Fraction'])/2
     PNW_bat_cap = (sums.loc[(scenario, 'WA', 'BATT', year+1), 'Capacity']*1000 + sums.loc[(scenario, 'WA', 'BATT', year-1), 'Capacity']*1000 + sums.loc[(scenario, 'OR', 'BATT', year+1), 'Capacity']*1000 + sums.loc[(scenario, 'OR', 'BATT', year-1), 'Capacity']*1000)/2
 
+#Zero out batteries for testing
+CAISO_bat_cap = 0
+PNW_bat_cap = 0
+
 #collects values in a DataFrame to write to csv file
-scenario_parameters = pd.DataFrame([CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC,bat_RoD,bat_eff],index=['CAISO_wind_cap','CAISO_solar_cap','CAISO_bat_cap','PNW_wind_cap','PNW_solar_cap','PNW_bat_cap','bat_RoC','bat_RoD','bat_eff'], columns = ['Value (MW)'])
+scenario_parameters = pd.DataFrame([CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff],index=['CAISO_wind_cap','CAISO_solar_cap','CAISO_bat_cap','PNW_wind_cap','PNW_solar_cap','PNW_bat_cap','bat_RoC_coeff','bat_RoD_coeff','bat_eff'], columns = ['Value (MW)'])
 ev_df = pd.DataFrame(EV_load,index=['Hour ' + str(x) for x in range(1,25)], columns = ['CAISO 24H EV Load','PNW 24H EV Load'])
 
 with ExcelWriter('scenario_parameters.xlsx') as writer:
     scenario_parameters.to_excel(writer, sheet_name='Capacities')
     ev_df.to_excel(writer, sheet_name='EV Load Profiles')
+    identifier.to_excel(writer, sheet_name='Scenario and Year')

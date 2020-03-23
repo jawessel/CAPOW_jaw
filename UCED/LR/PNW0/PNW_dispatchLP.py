@@ -36,6 +36,8 @@ model = AbstractModel()
 model.Zone5Generators =  Set()
 #PNW
 
+model.Zone5Battery = Set()
+
 model.Coal = Set()
 model.Gas = Set()
 model.Oil = Set()
@@ -111,6 +113,12 @@ model.h1_periods = RangeSet(1,24)
 model.h2_periods = RangeSet(25,48)
 model.ramp1_periods = RangeSet(2,24)
 model.ramp2_periods = RangeSet(26,48)
+
+#Battery parameters
+model.bat_cap = Param(model.Zone5Battery)
+model.bat_RoC = Param(model.Zone5Battery)
+model.bat_RoD = Param(model.Zone5Battery)
+model.bat_eff = Param(model.Zone5Battery)
 
 #Demand over simulation period
 model.SimDemand = Param(model.zones*model.SH_periods, within=NonNegativeReals)
@@ -200,6 +208,15 @@ model.mwh_1 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,ini
 model.mwh_2 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,initialize=0)
 model.mwh_3 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,initialize=0)
 
+#Battery decision variables
+model.bat_discharge = Var(model.Zone5Battery,model.HH_periods, within=NonNegativeReals,initialize=0)
+model.bat_charge = Var(model.Zone5Battery,model.HH_periods, within=NonNegativeReals,initialize=0)
+model.bat_SoC = Var(model.Zone5Battery, model.HH_periods, within=NonNegativeReals, initialize=0)
+
+#Battery Binary Variables
+model.bat_dis_on = Var(model.Zone5Battery,model.HH_periods, within=NonNegativeReals, initialize=0)
+model.bat_charge_on = Var(model.Zone5Battery,model.HH_periods, within=NonNegativeReals, initialize=0)
+
 #1 if unit is on in hour i
 model.on = Var(model.Generators,model.HH_periods, within=NonNegativeReals, initialize=0)
 
@@ -272,9 +289,47 @@ def Zone5_Balance(model,i):
     + model.wind['PNW',i] + model.HorizonMustRun['PNW',i]
     imports =  model.P66I_minflow[i] + model.P65I_minflow[i] + model.P8I_minflow[i] + model.P14I_minflow[i] + model.P3I_minflow[i] + model.mwh_1['P66I',i] + model.mwh_2['P66I',i] + model.mwh_3['P66I',i] + model.mwh_1['P65I',i] + model.mwh_2['P65I',i] + model.mwh_3['P65I',i] + model.mwh_1['P3I',i] + model.mwh_2['P3I',i] + model.mwh_3['P3I',i] + model.mwh_1['P8I',i] + model.mwh_2['P8I',i] + model.mwh_3['P8I',i] + model.mwh_1['P14I',i] + model.mwh_2['P14I',i] + model.mwh_3['P14I',i]
     exports =  model.HorizonPath66_exports[i] + model.HorizonPath65_exports[i] + model.HorizonPath8_exports[i] + model.HorizonPath3_exports[i] + model.HorizonPath14_exports[i]
-    return s1 + s2 + s3 + other + imports - exports >= model.HorizonDemand['PNW',i]
+    store = sum(model.bat_charge[j,i] for j in model.Zone5Battery)
+    discharge = sum(model.bat_discharge[j,i] for j in model.Zone5Battery)
+    return s1 + s2 + s3 + other + imports - exports + discharge >= model.HorizonDemand['PNW',i] + store
 model.Bal5Constraint= Constraint(model.hh_periods,rule=Zone5_Balance)
 
+#Battery Storage Constraints
+
+#SoC Constraint, state of charge is always <= the battery's capacity
+def Battery1(model,j,i):
+    SoC = model.bat_SoC[j,i]
+    Cap = model.bat_cap[j]
+    return SoC <= Cap
+model.BatConstraint1 = Constraint(model.Zone5Battery,model.hh_periods,rule=Battery1)
+
+#SoC Power Balance Constraint, keeps state of charge in balance after charging and discharging
+def Battery2(model,j,i):
+    SoC = model.bat_SoC[j,i]
+    SoC_tm1 = model.bat_SoC[j,i-1]
+    Charge = model.bat_charge[j,i]
+    Discharge = model.bat_discharge[j,i]
+    return SoC <= SoC_tm1 + Charge*model.bat_eff[j] - Discharge
+model.BatConstraint2 = Constraint(model.Zone5Battery, model.hh_periods, rule=Battery2)
+
+#Rate of Charge Constraint, total charge in one time step <= charge rate per hour
+def Battery3(model,j,i):
+    Charge = model.bat_charge[j,i]
+    return Charge <= model.bat_RoC[j] #* model.on[j,i]
+model.BatConstraint3 = Constraint(model.Zone5Battery, model.hh_periods, rule=Battery3)
+
+#Rate of Discharge Constraint, total discharge in one time step <= discharge rate per hour
+def Battery4(model,j,i):
+    Discharge = model.bat_discharge[j,i]
+    return Discharge <= model.bat_RoD[j] #* model.on[j,i]
+model.BatConstraint4 = Constraint(model.Zone5Battery, model.hh_periods, rule=Battery4)
+
+#Battery Binary Constraint, Cannot be Charging and Discharging in the same time step
+def Battery5(model,j,i):
+    On = model.bat_dis_on[j,i]
+    Off = model.bat_charge_on[j,i]
+    return On + Off <= 1
+model.BatConstraint5 = Constraint(model.Zone5Battery, model.hh_periods, rule=Battery5)
 
 # Daily production limits on dispatchable hydropower
 def HydroC1(model,i):

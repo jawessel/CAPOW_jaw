@@ -232,12 +232,10 @@ model.mwh_1 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,ini
 model.mwh_2 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,initialize=0)
 model.mwh_3 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,initialize=0)
 
-
 #Battery decision variables
 model.bat_discharge = Var(model.Batteries,model.HH_periods, within=NonNegativeReals,initialize=0)
 model.bat_charge = Var(model.Batteries,model.HH_periods, within=NonNegativeReals,initialize=0)
 model.bat_SoC = Var(model.Batteries, model.HH_periods, within=NonNegativeReals, initialize=0)
-
 
 #Battery Binary Variables
 model.bat_dis_on = Var(model.Batteries,model.HH_periods, within=Binary, initialize=0)
@@ -458,7 +456,6 @@ def Battery5(model,j,i):
     Off = model.bat_charge_on[j,i]
     return On + Off <= 1
 model.BatConstraint5 = Constraint(model.Batteries, model.hh_periods, rule=Battery5)
-
 
 # Daily production limits on dispatchable hydropower
 def HydroC1(model,i):
