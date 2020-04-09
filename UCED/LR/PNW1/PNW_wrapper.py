@@ -104,14 +104,40 @@ def sim(days):
             instance.HorizonPNW_hydro_minflow[i] = instance.SimPNW_hydro_minflow[(day-1)*24+i]
     #            
         PNW_result = opt.solve(instance)
-        instance.solutions.load_from(PNW_result)   
+        instance.solutions.load_from(PNW_result)
+        
+        bat_ch = [] #Initializing empty charge and discharge arrays as a pre-processing step before LP
+        bat_dis = []
+        
+        for v in instance.component_objects(Var, active=True):
+            varobject = getattr(instance, str(v))
+            a=str(v)
+            if a == 'bat_discharge':
+                
+                for index in varobject:
+                    if int(index[1]>0 and index[1]<49):
+                        if index[0] in instance.Zone5Battery:
+                            bat_dis.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
+
+            if a == 'bat_charge':
+                for index in varobject:
+                    if int(index[1]>0 and index[1]<49):
+                        if index[0] in instance.Zone5Battery:
+                            bat_ch.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
+        
+        charge = pd.DataFrame(bat_ch,columns=['Name','Hour','Value','Zone'])
+        charge.set_index(['Hour','Zone'])
+        discharge = pd.DataFrame(bat_dis,columns=['Name','Hour','Value','Zone'])
+        discharge.set_index(['Hour','Zone'])        
         
         for z in instance2.zones:
-            
+                          
             instance2.GasPrice[z] = instance2.SimGasPrice[z,day]
             
+            
             for i in K:
-                instance2.HorizonDemand[z,i] = instance2.SimDemand[z,(day-1)*24+i]
+                
+                instance2.HorizonDemand[z,i] = max(instance2.SimDemand[z,(day-1)*24+i] + charge.iloc[(i,z),'Value'] - discharge.iloc[(i,z),'Value'],0) #make sure it stays non-negative using max(x,0)
                 instance2.HorizonWind[z,i] = instance2.SimWind[z,(day-1)*24+i]
                 instance2.HorizonSolar[z,i] = instance2.SimSolar[z,(day-1)*24+i]
                 instance2.HorizonMustRun[z,i] = instance2.SimMustRun[z,(day-1)*24+i]
@@ -325,27 +351,27 @@ def sim(days):
                 if index[0] in instance.Zone5Generators:
                  on.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
                  
-            if a == 'bat_discharge':
-                
-                for index in varobject:
-                    if int(index[1]>0 and index[1]<25):
-                        if index[0] in instance.Zone5Battery:
-                            battery_discharge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
-
-            if a == 'bat_charge':
-                
-                for index in varobject:
-                    if int(index[1]>0 and index[1]<25):
-                        if index[0] in instance.Zone5Battery:
-                            battery_charge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
-
-
-            if a == 'bat_SoC':
-                
-                for index in varobject:
-                    if int(index[1]>0 and index[1]<25):
-                        if index[0] in instance.Zone5Battery:
-                            battery_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
+#            if a == 'bat_discharge':
+#                
+#                for index in varobject:
+#                    if int(index[1]>0 and index[1]<25):
+#                        if index[0] in instance.Zone5Battery:
+#                            battery_discharge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
+#
+#            if a == 'bat_charge':
+#                
+#                for index in varobject:
+#                    if int(index[1]>0 and index[1]<25):
+#                        if index[0] in instance.Zone5Battery:
+#                            battery_charge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
+#
+#
+#            if a == 'bat_SoC':
+#                
+#                for index in varobject:
+#                    if int(index[1]>0 and index[1]<25):
+#                        if index[0] in instance.Zone5Battery:
+#                            battery_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
              
             if a=='switch':
             

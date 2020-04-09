@@ -69,8 +69,8 @@ elif(year % 2 != 0):
     PNW_bat_cap = (sums.loc[(scenario, 'WA', 'BATT', year+1), 'Capacity']*1000 + sums.loc[(scenario, 'WA', 'BATT', year-1), 'Capacity']*1000 + sums.loc[(scenario, 'OR', 'BATT', year+1), 'Capacity']*1000 + sums.loc[(scenario, 'OR', 'BATT', year-1), 'Capacity']*1000)/2
 
 #Zero out batteries for testing
-CAISO_bat_cap = 0
-PNW_bat_cap = 0
+#CAISO_bat_cap = 0
+#PNW_bat_cap = 0
 
 #collects values in a DataFrame to write to csv file
 scenario_parameters = pd.DataFrame([CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff],index=['CAISO_wind_cap','CAISO_solar_cap','CAISO_bat_cap','PNW_wind_cap','PNW_solar_cap','PNW_bat_cap','bat_RoC_coeff','bat_RoD_coeff','bat_eff'], columns = ['Value (MW)'])

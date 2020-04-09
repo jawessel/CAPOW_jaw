@@ -92,12 +92,51 @@ def sim(days):
         CAISO_result = opt.solve(instance)
         instance.solutions.load_from(CAISO_result)
 
-        for z in instance2.zones:
+        bat_ch = []
+        bat_dis = []
+        
+        for v in instance.component_objects(Var, active=True):
+            varobject = getattr(instance, str(v))
+            a=str(v)
+        
+            if a == 'bat_discharge':
+            
+                for index in varobject:
+                    if int(index[1]>0 and index[1]<49):
+                        if index[0] in instance.Zone1Battery:
+                            bat_dis.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_valley'))
+                        elif index[0] in instance.Zone2Battery:
+                            bat_dis.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_bay'))
+                        elif index[0] in instance.Zone3Battery:
+                            bat_dis.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SCE'))
+                        elif index[0] in instance.Zone4Battery:
+                            bat_dis.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
 
+            if a == 'bat_charge':
+                
+                for index in varobject:
+                    if int(index[1]>0 and index[1]<49):
+                        if index[0] in instance.Zone1Battery:
+                            bat_ch.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_valley'))
+                        elif index[0] in instance.Zone2Battery:
+                            bat_ch.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_bay'))
+                        elif index[0] in instance.Zone3Battery:
+                            bat_ch.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SCE'))
+                        elif index[0] in instance.Zone4Battery:
+                            bat_ch.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
+
+        charge = pd.DataFrame(bat_ch,columns=['Name','Hour','Value','Zone'])
+        charge.set_index(['Hour','Zone'])
+        discharge = pd.DataFrame(bat_dis,columns=['Name','Hour','Value','Zone'])
+        discharge.set_index(['Hour','Zone'])
+
+        for z in instance2.zones:
+            
             instance2.GasPrice[z] = instance2.SimGasPrice[z,day]
 
             for i in K:
-                instance2.HorizonDemand[z,i] = instance2.SimDemand[z,(day-1)*24+i]
+                
+                instance2.HorizonDemand[z,i] = max(instance2.SimDemand[z,(day-1)*24+i] + charge.loc[(i,z),'Value'] - discharge.loc[(i,z),'Value'],0) #make sure it stays non-negative using max(x,0)
                 instance2.HorizonWind[z,i] = instance2.SimWind[z,(day-1)*24+i]
                 instance2.HorizonSolar[z,i] = instance2.SimSolar[z,(day-1)*24+i]
                 instance2.HorizonMustRun[z,i] = instance2.SimMustRun[z,(day-1)*24+i]
@@ -549,45 +588,45 @@ def sim(days):
                  on.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
                  
                  
-            if a == 'bat_discharge':
-                
-                for index in varobject:
-                    if int(index[1]>0 and index[1]<25):
-                        if index[0] in instance.Zone1Battery:
-                            battery_discharge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_valley'))
-                        elif index[0] in instance.Zone2Battery:
-                            battery_discharge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_bay'))
-                        elif index[0] in instance.Zone3Battery:
-                            battery_discharge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SCE'))
-                        elif index[0] in instance.Zone4Battery:
-                            battery_discharge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
-
-            if a == 'bat_charge':
-                
-                for index in varobject:
-                    if int(index[1]>0 and index[1]<25):
-                        if index[0] in instance.Zone1Battery:
-                            battery_charge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_valley'))
-                        elif index[0] in instance.Zone2Battery:
-                            battery_charge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_bay'))
-                        elif index[0] in instance.Zone3Battery:
-                            battery_charge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SCE'))
-                        elif index[0] in instance.Zone4Battery:
-                            battery_charge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
-
-
-            if a == 'bat_SoC':
-                
-                for index in varobject:
-                    if int(index[1]>0 and index[1]<25):
-                        if index[0] in instance.Zone1Battery:
-                            battery_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_valley'))
-                        elif index[0] in instance.Zone2Battery:
-                            battery_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_bay'))
-                        elif index[0] in instance.Zone3Battery:
-                            battery_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SCE'))
-                        elif index[0] in instance.Zone4Battery:
-                            battery_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
+#            if a == 'bat_discharge':
+#                
+#                for index in varobject:
+#                    if int(index[1]>0 and index[1]<25):
+#                        if index[0] in instance.Zone1Battery:
+#                            battery_discharge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_valley'))
+#                        elif index[0] in instance.Zone2Battery:
+#                            battery_discharge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_bay'))
+#                        elif index[0] in instance.Zone3Battery:
+#                            battery_discharge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SCE'))
+#                        elif index[0] in instance.Zone4Battery:
+#                            battery_discharge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
+#
+#            if a == 'bat_charge':
+#                
+#                for index in varobject:
+#                    if int(index[1]>0 and index[1]<25):
+#                        if index[0] in instance.Zone1Battery:
+#                            battery_charge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_valley'))
+#                        elif index[0] in instance.Zone2Battery:
+#                            battery_charge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_bay'))
+#                        elif index[0] in instance.Zone3Battery:
+#                            battery_charge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SCE'))
+#                        elif index[0] in instance.Zone4Battery:
+#                            battery_charge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
+#
+#
+#            if a == 'bat_SoC':
+#                
+#                for index in varobject:
+#                    if int(index[1]>0 and index[1]<25):
+#                        if index[0] in instance.Zone1Battery:
+#                            battery_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_valley'))
+#                        elif index[0] in instance.Zone2Battery:
+#                            battery_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_bay'))
+#                        elif index[0] in instance.Zone3Battery:
+#                            battery_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SCE'))
+#                        elif index[0] in instance.Zone4Battery:
+#                            battery_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
 
             if a=='switch':
 
