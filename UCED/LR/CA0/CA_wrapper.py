@@ -21,7 +21,7 @@ def sim(days):
 
 
     instance = m1.create_instance('data.dat')
-    instance2 = m2.create_instance('data.dat')
+    instance2 = m2.create_instance('dataLP.dat')
 
 
     instance2.dual = pyo.Suffix(direction=pyo.Suffix.IMPORT)
@@ -136,7 +136,12 @@ def sim(days):
 
             for i in K:
                 
-                instance2.HorizonDemand[z,i] = max(instance2.SimDemand[z,(day-1)*24+i] + charge.loc[(i,z),'Value'] - discharge.loc[(i,z),'Value'],0) #make sure it stays non-negative using max(x,0)
+                c = charge[(charge['Hour'] == i) & (charge['Zone']==z)]
+                c = np.float(c['Value'].values)
+                d = discharge[(discharge['Hour'] == i) & (discharge['Zone']==z)]
+                d = np.float(d['Value'].values)
+            
+                instance2.HorizonDemand[z,i] = max(instance2.SimDemand[z,(day-1)*24+i] + c - d,0) #make sure it stays non-negative using max(x,0)
                 instance2.HorizonWind[z,i] = instance2.SimWind[z,(day-1)*24+i]
                 instance2.HorizonSolar[z,i] = instance2.SimSolar[z,(day-1)*24+i]
                 instance2.HorizonMustRun[z,i] = instance2.SimMustRun[z,(day-1)*24+i]
@@ -164,6 +169,7 @@ def sim(days):
             instance2.HorizonPath61_minflow[i] = instance2.SimPath61_imports_minflow[(day-1)*24+i]
             instance2.HorizonPGE_valley_hydro_minflow[i] = instance2.SimPGE_valley_hydro_minflow[(day-1)*24+i]
             instance2.HorizonSCE_hydro_minflow[i] = instance2.SimSCE_hydro_minflow[(day-1)*24+i]
+
         for j in instance.Generators:
             for t in K:
                 if instance.on[j,t] == 1:
@@ -181,23 +187,6 @@ def sim(days):
                     instance2.switch[j,t] = 0
                     instance2.switch[j,t] = 0
                     instance2.switch[j,t].fixed = True
-        for j in instance.Batteries:
-            for t in K:
-                if instance.bat_dis_on[j,t] == 1:
-                    instance2.bat_dis_on[j,t] = 1
-                    instance2.bat_dis_on[j,t].fixed = True                    
-                else:
-                    instance.bat_dis_on[j,t] = 0
-                    instance2.bat_dis_on[j,t] = 0
-                    instance2.bat_dis_on[j,t].fixed = True                    
-
-                if instance.bat_charge_on[j,t] == 1:
-                    instance2.bat_charge_on[j,t] = 1
-                    instance2.bat_charge_on[j,t].fixed = True                    
-                else:
-                    instance.bat_charge_on[j,t] = 0
-                    instance2.bat_charge_on[j,t] = 0
-                    instance2.bat_charge_on[j,t].fixed = True                      
                     
         results = opt.solve(instance2)
         instance2.solutions.load_from(results)
@@ -641,7 +630,6 @@ def sim(days):
                 elif index[0] in instance.Zone4Generators:
                  switch.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
 
-
             if a=='srsv':
 
              for index in varobject:
@@ -654,7 +642,6 @@ def sim(days):
                  srsv.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SCE'))
                 elif index[0] in instance.Zone4Generators:
                  srsv.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
-
 
             if a=='nrsv':
 
@@ -669,13 +656,11 @@ def sim(days):
                 elif index[0] in instance.Zone4Generators:
                  nrsv.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
 
-
             if a=='solar':
 
              for index in varobject:
                if int(index[1]>0 and index[1]<25):
                 solar.append((index[0],index[1]+((day-1)*24),varobject[index].value))
-
 
             if a=='wind':
 
@@ -696,7 +681,6 @@ def sim(days):
                 else:
                     instance.on[j,0] = 0
                 
-
                 if instance.mwh_1[j,24].value <=0 and instance.mwh_1[j,24].value>= -0.0001:
                     newval_1=0
                 else:

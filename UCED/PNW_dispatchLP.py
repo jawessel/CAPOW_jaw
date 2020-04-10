@@ -114,12 +114,6 @@ model.h2_periods = RangeSet(25,48)
 model.ramp1_periods = RangeSet(2,24)
 model.ramp2_periods = RangeSet(26,48)
 
-#Battery parameters
-#model.bat_cap = Param(model.Zone5Battery)
-#model.bat_RoC = Param(model.Zone5Battery)
-#model.bat_RoD = Param(model.Zone5Battery)
-#model.bat_eff = Param(model.Zone5Battery)
-
 #Demand over simulation period
 model.SimDemand = Param(model.zones*model.SH_periods, within=NonNegativeReals)
 
@@ -207,15 +201,6 @@ model.ini_mwh_3 = Param(model.Generators,initialize=0,mutable=True) #seg3
 model.mwh_1 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,initialize=0)
 model.mwh_2 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,initialize=0)
 model.mwh_3 = Var(model.Generators,model.HH_periods, within=NonNegativeReals,initialize=0)
-
-##Battery decision variables
-#model.bat_discharge = Var(model.Zone5Battery,model.HH_periods, within=NonNegativeReals,initialize=0)
-#model.bat_charge = Var(model.Zone5Battery,model.HH_periods, within=NonNegativeReals,initialize=0)
-#model.bat_SoC = Var(model.Zone5Battery, model.HH_periods, within=NonNegativeReals, initialize=0)
-#
-##Battery Binary Variables
-#model.bat_dis_on = Var(model.Zone5Battery,model.HH_periods, within=NonNegativeReals, initialize=0)
-#model.bat_charge_on = Var(model.Zone5Battery,model.HH_periods, within=NonNegativeReals, initialize=0)
 
 #1 if unit is on in hour i
 model.on = Var(model.Generators,model.HH_periods, within=NonNegativeReals, initialize=0)
