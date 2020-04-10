@@ -84,5 +84,15 @@ for i in range(0,int(sim_years)):
     # PACIFIC NORTHWEST
     import PNW_data_setup
     PNW_data_setup.setup(year)
+    
+    
+    
+    import CA_data_setup2
+    CA_data_setup2.setup(year,hist,hist_year)
+
+
+    # PACIFIC NORTHWEST
+    import PNW_data_setup2
+    PNW_data_setup2.setup(year)
 
     print(i)
