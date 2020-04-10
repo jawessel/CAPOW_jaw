@@ -43,6 +43,7 @@ sim_years = len(df_sim)/365
 # year = np.random.uniform(0,1,1)*sim_years
 # year = int(np.floor(year))
 
+#for i in range(0,1):   
 for i in range(0,int(sim_years)):
     year=int(i)
 
