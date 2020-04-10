@@ -145,6 +145,9 @@ def sim(days):
                 instance2.HorizonWind[z,i] = instance2.SimWind[z,(day-1)*24+i]
                 instance2.HorizonSolar[z,i] = instance2.SimSolar[z,(day-1)*24+i]
                 instance2.HorizonMustRun[z,i] = instance2.SimMustRun[z,(day-1)*24+i]
+                instance2.HorizonWind[z,i] = instance2.SimWind[z,(day-1)*24+i]
+                instance2.HorizonSolar[z,i] = instance2.SimSolar[z,(day-1)*24+i]
+                instance2.HorizonMustRun[z,i] = instance2.SimMustRun[z,(day-1)*24+i]
 
         for d in range(1,D+1):
             instance2.HorizonPath66_imports[d] = instance2.SimPath66_imports[day-1+d]
@@ -169,7 +172,7 @@ def sim(days):
             instance2.HorizonPath61_minflow[i] = instance2.SimPath61_imports_minflow[(day-1)*24+i]
             instance2.HorizonPGE_valley_hydro_minflow[i] = instance2.SimPGE_valley_hydro_minflow[(day-1)*24+i]
             instance2.HorizonSCE_hydro_minflow[i] = instance2.SimSCE_hydro_minflow[(day-1)*24+i]
-
+  
         for j in instance.Generators:
             for t in K:
                 if instance.on[j,t] == 1:
@@ -187,6 +190,7 @@ def sim(days):
                     instance2.switch[j,t] = 0
                     instance2.switch[j,t] = 0
                     instance2.switch[j,t].fixed = True
+                   
                     
         results = opt.solve(instance2)
         instance2.solutions.load_from(results)
@@ -630,6 +634,7 @@ def sim(days):
                 elif index[0] in instance.Zone4Generators:
                  switch.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
 
+
             if a=='srsv':
 
              for index in varobject:
@@ -642,6 +647,7 @@ def sim(days):
                  srsv.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SCE'))
                 elif index[0] in instance.Zone4Generators:
                  srsv.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
+
 
             if a=='nrsv':
 
@@ -656,11 +662,13 @@ def sim(days):
                 elif index[0] in instance.Zone4Generators:
                  nrsv.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
 
+
             if a=='solar':
 
              for index in varobject:
                if int(index[1]>0 and index[1]<25):
                 solar.append((index[0],index[1]+((day-1)*24),varobject[index].value))
+
 
             if a=='wind':
 
@@ -681,6 +689,7 @@ def sim(days):
                 else:
                     instance.on[j,0] = 0
                 
+
                 if instance.mwh_1[j,24].value <=0 and instance.mwh_1[j,24].value>= -0.0001:
                     newval_1=0
                 else:

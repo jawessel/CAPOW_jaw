@@ -306,7 +306,7 @@ def WECC1(model,i):
     renew = model.solar['PGE_valley',i]\
     + model.wind['PGE_valley',i] + model.PGEVH_minflow[i]
     must_run = model.HorizonMustRun['PGE_valley',i]
-    return s1 + s2 + s3 + renew + must_run >=  0.25*model.HorizonDemand['PGE_valley',i] 
+    return s1 + s2 + s3 + renew + must_run >=  0.25*model.HorizonDemand['PGE_valley',i]
 
 model.Local1= Constraint(model.hh_periods,rule=WECC1)
 ##
@@ -316,7 +316,7 @@ def WECC2(model,i):
     s3 = sum(model.mwh_3[j,i] for j in model.Zone2Generators)
     renew =  model.solar['PGE_bay',i] + model.wind['PGE_bay',i]
     must_run = model.HorizonMustRun['PGE_bay',i]
-    return s1 + s2 + s3 + renew + must_run >=  0.25*model.HorizonDemand['PGE_bay',i] 
+    return s1 + s2 + s3 + renew + must_run >=  0.25*model.HorizonDemand['PGE_bay',i]
 
 model.Local2= Constraint(model.hh_periods,rule=WECC2)
 ###
@@ -350,7 +350,7 @@ def Zone1_Balance(model,i):
     + model.wind['PGE_valley',i] + model.HorizonMustRun['PGE_valley',i]
     imports = sum(model.flow[s,'PGE_valley',i] for s in model.sources) + model.P66I_minflow[i] + model.mwh_1['P66I',i] + model.mwh_2['P66I',i] + model.mwh_3['P66I',i] + model.mwh_1['P24I',i] + model.mwh_2['P24I',i] + model.mwh_3['P24I',i]
     exports = sum(model.flow['PGE_valley',k,i] for k in model.sinks) + model.HorizonPath24_exports[i] + model.HorizonPath66_exports[i]
-    return s1 + s2 + s3 + other + imports - exports >= model.HorizonDemand['PGE_valley',i]
+    return s1 + s2 + s3 + other + imports - exports >= model.HorizonDemand['PGE_valley',i] 
 
 model.Bal1Constraint= Constraint(model.hh_periods,rule=Zone1_Balance)
 
@@ -362,7 +362,7 @@ def Zone2_Balance(model,i):
     + model.wind['PGE_bay',i] + model.HorizonMustRun['PGE_bay',i]
     imports = sum(model.flow[s,'PGE_bay',i] for s in model.sources)
     exports = sum(model.flow['PGE_bay',k,i] for k in model.sinks)
-    return s1 + s2 + s3 + other + imports - exports >= model.HorizonDemand['PGE_bay',i]
+    return s1 + s2 + s3 + other + imports - exports >= model.HorizonDemand['PGE_bay',i] 
 
 model.Bal2Constraint= Constraint(model.hh_periods,rule=Zone2_Balance)
 #
@@ -373,7 +373,7 @@ def Zone3_Balance(model,i):
     other = model.solar['SCE',i] + model.wind['SCE',i] + model.HorizonMustRun['SCE',i] + model.SCEH_minflow[i]
     imports = sum(model.flow[s,'SCE',i] for s in model.sources) + model.P46I_SCE_minflow[i] + model.mwh_1['P46I_SCE',i] + model.mwh_2['P46I_SCE',i] + model.mwh_3['P46I_SCE',i] + model.P61I_minflow[i] + model.mwh_1['P61I',i] + model.mwh_2['P61I',i] + model.mwh_3['P61I',i] + model.P42I_minflow[i] + model.mwh_1['P42I',i] + model.mwh_2['P42I',i] + model.mwh_3['P42I',i]
     exports = sum(model.flow['SCE',k,i] for k in model.sinks) + model.HorizonPath42_exports[i]
-    return s1 + s2 + s3 + other + imports - exports >= model.HorizonDemand['SCE',i]
+    return s1 + s2 + s3 + other + imports - exports >= model.HorizonDemand['SCE',i] 
 
 model.Bal3Constraint= Constraint(model.hh_periods,rule=Zone3_Balance)
 #
