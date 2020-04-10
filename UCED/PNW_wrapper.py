@@ -136,6 +136,11 @@ def sim(days):
             
             
             for i in K:
+
+                c = charge[(charge['Hour'] == (i-1)*24) & (charge['Zone']==z)]
+                c = np.float(c['Value'].values)
+                d = discharge[(discharge['Hour'] == (i-1)*24) & (discharge['Zone']==z)]
+                d = np.float(d['Value'].values)
                 
                 instance2.HorizonDemand[z,i] = max(instance2.SimDemand[z,(day-1)*24+i] + charge.iloc[(i,z),'Value'] - discharge.iloc[(i,z),'Value'],0) #make sure it stays non-negative using max(x,0)
                 instance2.HorizonWind[z,i] = instance2.SimWind[z,(day-1)*24+i]
