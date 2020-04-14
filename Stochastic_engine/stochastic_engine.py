@@ -55,7 +55,7 @@ print('streamflows')
 # DAILY HYDROPOWER SIMULATION
 
 # Now specify a smaller subset of stochastic data to run (must be <= stoch years)
-sim_years = 2
+sim_years = 1
 
 # Run ORCA to get California storage dam releases
 import main

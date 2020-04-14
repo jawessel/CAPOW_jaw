@@ -14,11 +14,11 @@ import pandas as pd
 import numpy as np
 
 #MUST SPECIFY VALID SCENARIO AND YEAR
-#Scenarios: 'MID' = Mid-Case, 'EV' = High EV Adoption, 'BAT' = Low Battery Storage Cost
-#   'LOWRECOST' = Low RE Cost, 'HIGHRECOST' = High RE Cost
+#Scenarios: 'MID' = Mid-Case (S1), 'EV' = High EV Adoption (S2), 'BAT' = Low Battery Storage Cost (S3)
+#   'LOWRECOST' = Low RE Cost / High Gas Price (S4), 'HIGHRECOST' = High RE Cost / Low Gas Price (S5)
 #Years: 2020 - 2050
 scenario = 'MID'
-year = 2025
+year = 2020
 identifier = pd.DataFrame([scenario, str(year)])
 
 #Specify battery rate of charge, rate of discharge, and efficiency

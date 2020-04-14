@@ -46,9 +46,9 @@ def sim(days):
     flow=[]
     Generator=[]
     Duals=[]
-    battery_discharge = []
-    battery_charge = []
-    battery_state = []
+#    battery_discharge = []
+#    battery_charge = []
+#    battery_state = []
     df_generators = pd.read_csv('generators.csv',header=0)
 
     #max here can be (1,365)
@@ -94,6 +94,7 @@ def sim(days):
 
         bat_ch = []
         bat_dis = []
+        bat_state = []
         
         for v in instance.component_objects(Var, active=True):
             varobject = getattr(instance, str(v))
@@ -124,6 +125,19 @@ def sim(days):
                             bat_ch.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SCE'))
                         elif index[0] in instance.Zone4Battery:
                             bat_ch.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
+
+            if a == 'bat_SoC':
+                
+                for index in varobject:
+                    if int(index[1]>0 and index[1]<25):
+                        if index[0] in instance.Zone1Battery:
+                            bat_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_valley'))
+                        elif index[0] in instance.Zone2Battery:
+                            bat_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PGE_bay'))
+                        elif index[0] in instance.Zone3Battery:
+                            bat_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SCE'))
+                        elif index[0] in instance.Zone4Battery:
+                            bat_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'SDGE'))
 
         charge = pd.DataFrame(bat_ch,columns=['Name','Hour','Value','Zone'])
         charge.set_index(['Hour','Zone'])
@@ -750,9 +764,9 @@ def sim(days):
     mwh_2_pd=pd.DataFrame(mwh_2,columns=('Generator','Time','Value','Zones','Type','$/MWh'))
     mwh_3_pd=pd.DataFrame(mwh_3,columns=('Generator','Time','Value','Zones','Type','$/MWh'))
     on_pd=pd.DataFrame(on,columns=('Generator','Time','Value','Zones'))
-    battery_charge_pd = pd.DataFrame(battery_charge, columns=('Generator','Time','Value','Zones'))
-    battery_discharge_pd = pd.DataFrame(battery_discharge, columns=('Generator','Time','Value','Zones'))
-    battery_state_pd = pd.DataFrame(battery_state, columns=('Generator','Time','Value','Zones'))    
+    battery_charge_pd = pd.DataFrame(bat_ch, columns=('Generator','Time','Value','Zones'))
+    battery_discharge_pd = pd.DataFrame(bat_dis, columns=('Generator','Time','Value','Zones'))
+    battery_state_pd = pd.DataFrame(bat_state, columns=('Generator','Time','Value','Zones'))    
     switch_pd=pd.DataFrame(switch,columns=('Generator','Time','Value','Zones'))
     srsv_pd=pd.DataFrame(srsv,columns=('Generator','Time','Value','Zones'))
     nrsv_pd=pd.DataFrame(nrsv,columns=('Generator','Time','Value','Zones'))
