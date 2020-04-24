@@ -8,6 +8,10 @@ Created on Wed Sep 19 09:59:48 2018
 import pandas as pd
 import scenario_chooser
 
+import sys
+sys.path.insert(1,'../Model_setup')
+import UCED_setup
+
 ############################################################################
 # HISTORICAL WEATHER AND STREAMFLOW ANALYSIS
 
