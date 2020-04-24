@@ -7,11 +7,14 @@ Created on Tue Mar  5 16:37:53 2019
 
 import pandas as pd
 import numpy as np
+from pandas import ExcelWriter
 
-def setup(year):
+def setup(year,CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,scenario,model_year,identifier):
 
     #read generator parameters into DataFrame
     df_gen = pd.read_csv('PNW_data_file/generators.csv',header=0)
+
+    df_bat_params = pd.DataFrame([CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff],index=['CAISO_wind_cap','CAISO_solar_cap','CAISO_bat_cap','PNW_wind_cap','PNW_solar_cap','PNW_bat_cap','bat_RoC_coeff','bat_RoD_coeff','bat_eff'], columns = ['Value (MW)'])
 
     zone = ['PNW']
     ##time series of load for each zone
@@ -81,7 +84,7 @@ def setup(year):
 
 
 
-    path=str(Path.cwd().parent) +str (Path('/UCED/LR/PNW' + str(year)))
+    path=str(Path.cwd().parent) +str (Path('/UCED/LR/S' + str(scenario) + '/' + str(model_year) + '/PNW' + str(year)))
     os.makedirs(path,exist_ok=True)
 
     generators_file='PNW_data_file/generators.csv'
@@ -91,7 +94,12 @@ def setup(year):
     simulation_file='../UCED/PNW_simulation.py'
     emission_cal_file='../UCED/PNW_emission_calculation.py'
     emission_gen_file = '../UCED/PNW_emissions_generator.csv'
-    scenario_param_file = '../Stochastic_engine/scenario_parameters.xlsx'
+    
+    with ExcelWriter('scenario_parameters.xlsx') as writer:
+        df_bat_params.to_excel(writer, sheet_name='Capacities')
+        ev_df.to_excel(writer, sheet_name='EV Load Profiles')
+        identifier.to_excel(writer, sheet_name='Scenario and Year')
+    scenario_param_file = 'scenario_parameters.xlsx'
 
     copy(dispatch_file,path)
     copy(wrapper_file,path)

@@ -6,6 +6,7 @@ Created on Wed Sep 19 09:59:48 2018
 """
 
 import pandas as pd
+import scenario_chooser
 
 ############################################################################
 # HISTORICAL WEATHER AND STREAMFLOW ANALYSIS
@@ -16,19 +17,6 @@ import pandas as pd
 import time
 starttime = time.time()
 #import calculate_cov
-############################################################################
-
-import pandas as pd
-#import scenario parameters here
-capacities = pd.read_excel('scenario_parameters.xlsx',sheet_name = 'Capacities', index_col=0)
-CAISO_wind_cap = capacities.loc[('CAISO_wind_cap'),'Value (MW)']
-CAISO_solar_cap = capacities.loc[('CAISO_solar_cap'),'Value (MW)']
-PNW_wind_cap = capacities.loc[('PNW_wind_cap'), 'Value (MW)']
-PNW_solar_cap = capacities.loc[('PNW_solar_cap'), 'Value (MW)']
-ev_profiles = pd.read_excel('scenario_parameters.xlsx',sheet_name = 'EV Load Profiles', index_col=0)
-
-#write EV Load profiles to csv to be used elsewhere
-ev_profiles.to_csv('EV_load.csv')
 
 ############################################################################
 # STOCHASTIC WEATHER AND STREAMFLOW GENERATION
@@ -55,7 +43,7 @@ print('streamflows')
 # DAILY HYDROPOWER SIMULATION
 
 # Now specify a smaller subset of stochastic data to run (must be <= stoch years)
-sim_years = 4
+sim_years = 1
 
 # Run ORCA to get California storage dam releases
 import main
@@ -85,63 +73,75 @@ print('FCRPS')
 #############################################################################
 ## HOURLY WIND AND SOLAR POWER PRODUCTION
 
-## WIND
-# Specify installed capacity of wind power for each zone
-#PNW_cap = 6445
-#CAISO_cap = 4915
+#iterate through each scenario
+#Scenarios: 'MID' = Mid-Case (S1), 'EV' = High EV Adoption (S2), 'BAT' = Low Battery Storage Cost (S3)
+#   'LOWRECOST' = Low RE Cost / High Gas Price (S4), 'HIGHRECOST' = High RE Cost / Low Gas Price (S5)
+#Years: 2020 - 2050
+for i in range(1,6):
 
-# Generate synthetic hourly wind power production time series for the BPA and
-# CAISO zones for the entire simulation period
-import wind_speed2_wind_power
-wind_speed2_wind_power.wind_sim(sim_years,PNW_wind_cap,CAISO_wind_cap)
-print('wind')
+    #iterate through each year (every 5 years from 2020-2050)
+    yrs = [2020,2025,2030,2035,2040,2045,2050]
+    for j in yrs:
+        
+        #define all specific parameters using scenario chooser
+        [CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,identifier] = scenario_chooser.choose(i,j)
+        
+        #write EV Load profiles to csv to be used elsewhere
+        ev_df.to_csv('EV_load.csv')        
+        
+        # Generate synthetic hourly wind power production time series for the BPA and
+        # CAISO zones for the entire simulation period
+        import wind_speed2_wind_power
+        wind_speed2_wind_power.wind_sim(sim_years,PNW_wind_cap,CAISO_wind_cap)
+        print('wind')
+        
+        # Generate synthetic hourly solar power production time series for 
+        # the CAISO zone for the entire simulation period
+        import solar_production_simulation2
+        solar_production_simulation2.solar_sim(sim_years, PNW_solar_cap, CAISO_solar_cap)
+        print('solar')
+        ##############################################################################
+        #
+        ##############################################################################
+        # ELECTRICITY DEMAND AND TRANSMISSION PATH FLOWS
+        
+        # Calculate daily peak and hourly electricity demand for each zone and daily 
+        # flows of electricity along each WECC path that exchanges electricity between
+        # core UC/ED model (CAISO, Mid-C markets) and other WECC zones
+        
+        import demand_pathflows
+        print('paths')
+        ##############################################################################
+        #
+        ##############################################################################
+        # NATURAL GAS PRICES
+        
+        # NOTE: NEED SCRIPT HERE TO SIMULATE STOCHASTIC NATURAL GAS PRICES 
+        # *OR*
+        # ESTIMATE STATIC GAS PRICES FOR EACH ZONE
+        
+        import numpy as np
+        ng = np.ones((sim_years*365,5))
+        ng[:,0] = ng[:,0]*4.47
+        ng[:,1] = ng[:,1]*4.47
+        ng[:,2] = ng[:,2]*4.66
+        ng[:,3] = ng[:,3]*4.66
+        ng[:,4] = ng[:,4]*5.13
+        
+        import pandas as pd
+        NG = pd.DataFrame(ng)
+        NG.columns = ['SCE','SDGE','PGE_valley','PGE_bay','PNW']
+        NG.to_excel('Gas_prices/NG.xlsx')
+        
+        elapsed = time.time() - starttime
+        print(elapsed)
+        
+        #############################################################################
+        #
+        #############################################################################
+        #MODEL SETUP (UCED_setup file converted to function to iterate through each scenario/year combination)
 
-# SOLAR
-# Specify installed capacity of solar power for each zone
-#CAISO_solar_cap = 9890
-
-# Generate synthetic hourly solar power production time series for 
-# the CAISO zone for the entire simulation period
-import solar_production_simulation2
-solar_production_simulation2.solar_sim(sim_years, PNW_solar_cap, CAISO_solar_cap)
-print('solar')
-##############################################################################
-#
-##############################################################################
-# ELECTRICITY DEMAND AND TRANSMISSION PATH FLOWS
-
-# Calculate daily peak and hourly electricity demand for each zone and daily 
-# flows of electricity along each WECC path that exchanges electricity between
-# core UC/ED model (CAISO, Mid-C markets) and other WECC zones
-
-import demand_pathflows
-print('paths')
-##############################################################################
-#
-##############################################################################
-# NATURAL GAS PRICES
-
-# NOTE: NEED SCRIPT HERE TO SIMULATE STOCHASTIC NATURAL GAS PRICES 
-# *OR*
-# ESTIMATE STATIC GAS PRICES FOR EACH ZONE
-
-import numpy as np
-ng = np.ones((sim_years*365,5))
-ng[:,0] = ng[:,0]*4.47
-ng[:,1] = ng[:,1]*4.47
-ng[:,2] = ng[:,2]*4.66
-ng[:,3] = ng[:,3]*4.66
-ng[:,4] = ng[:,4]*5.13
-
-import pandas as pd
-NG = pd.DataFrame(ng)
-NG.columns = ['SCE','SDGE','PGE_valley','PGE_bay','PNW']
-NG.to_excel('Gas_prices/NG.xlsx')
-
-elapsed = time.time() - starttime
-print(elapsed)
-
-
+        UCED_setup.model_setup(CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,i,j,identifier)
 
 
 

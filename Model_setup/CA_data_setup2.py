@@ -7,14 +7,14 @@ Created on Wed May 03 15:01:31 2017
 
 import pandas as pd
 import numpy as np
+from pandas import ExcelWriter
 
-def setup(year,hist,hist_year):
-#    year = 0
-#    hist = 0
-#    hist_year = 2010
+def setup(year,hist,hist_year,CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,scenario,model_year,identifier):
 
     #read generator parameters into DataFrame
     df_gen = pd.read_csv('CA_data_file/generators.csv',header=0)
+
+    df_bat_params = pd.DataFrame([CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff],index=['CAISO_wind_cap','CAISO_solar_cap','CAISO_bat_cap','PNW_wind_cap','PNW_solar_cap','PNW_bat_cap','bat_RoC_coeff','bat_RoD_coeff','bat_eff'], columns = ['Value (MW)'])
 
     #read transmission path parameters into DataFrame
     df_paths = pd.read_csv('CA_data_file/paths.csv',header=0)
@@ -133,7 +133,7 @@ def setup(year,hist,hist_year):
     from pathlib import Path
 
 
-    path=str(Path.cwd().parent) +str (Path('/UCED/LR/CA' + str(year)))
+    path=str(Path.cwd().parent) +str (Path('/UCED/LR/S' + str(scenario) + '/' + str(model_year) + '/CA' + str(year)))
     os.makedirs(path,exist_ok=True)
 
     generators_file='CA_data_file/generators.csv'
@@ -143,7 +143,12 @@ def setup(year,hist,hist_year):
     simulation_file='../UCED/CA_simulation.py'
     emission_cal_file='../UCED/CA_emission_calculation.py'
     emission_gen_file = '../UCED/CA_emissions_generator.csv'
-    scenario_param_file = '../Stochastic_engine/scenario_parameters.xlsx'
+    
+    with ExcelWriter('scenario_parameters.xlsx') as writer:
+        df_bat_params.to_excel(writer, sheet_name='Capacities')
+        ev_df.to_excel(writer, sheet_name='EV Load Profiles')
+        identifier.to_excel(writer, sheet_name='Scenario and Year')
+    scenario_param_file = 'scenario_parameters.xlsx'
 
     copy(dispatch_file,path)
     copy(wrapper_file,path)

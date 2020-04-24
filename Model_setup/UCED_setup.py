@@ -36,64 +36,68 @@ Created on Wed Oct  3 21:29:55 2018
 import pandas as pd
 import numpy as np
 
-# Run the following lines if you want to select a random year from the synthetic record
-#to be run through the UC/ED model.
-df_sim = pd.read_excel('../Stochastic_engine/CA_hydropower/CA_hydro_daily.xlsx')
-sim_years = len(df_sim)/365
-# year = np.random.uniform(0,1,1)*sim_years
-# year = int(np.floor(year))
+def model_setup(CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,scenario,model_year,identifier):
 
-#for i in range(0,1):   
-for i in range(0,int(sim_years)):
-    year=int(i)
-
-    ############################################################################
-    #                          CA TIME SERIES SETUP
-
-    # Calculates "minimum flows" for zonal hydropower production and imports,
-    # dispatchable imports and hydropower, and hourly export demand
-
-    import CA_exchange_time_series
-    CA_exchange_time_series.exchange(year)
-
-    ############################################################################
-    #                          PNW TIME SERIES SETUP
-
-    # Note: In future versions this can be set up differently to coordinate hourly
-    # Export time series (PNW-->CAISO) with records of dispatched imports from the
-    # CAISO market model.
-
-
-    import PNW_exchange_time_series
-    PNW_exchange_time_series.exchange(year)
-
-
-    ############################################################################
-    #                          UC/ED Data File Setup
-
-    # CALFIFORNIA
-    # hist = 1 if looking at historical nuclear power production; facilitates use of
-    # monthly nuclear power generation data from EIA. Note that if hist = 0
-    # the model assumes that nuclear power plants in California have been retired.
-    hist = 0
-    hist_year = 2011
-
-    import CA_data_setup
-    CA_data_setup.setup(year,hist,hist_year)
-
-
-    # PACIFIC NORTHWEST
-    import PNW_data_setup
-    PNW_data_setup.setup(year)
+    # Run the following lines if you want to select a random year from the synthetic record
+    #to be run through the UC/ED model.
+    df_sim = pd.read_excel('../Stochastic_engine/CA_hydropower/CA_hydro_daily.xlsx')
+    sim_years = len(df_sim)/365
+    # year = np.random.uniform(0,1,1)*sim_years
+    # year = int(np.floor(year))
+    
+    #for i in range(0,1):   
+    for i in range(0,int(sim_years)):
+        year=int(i)
+    
+        ############################################################################
+        #                          CA TIME SERIES SETUP
+    
+        # Calculates "minimum flows" for zonal hydropower production and imports,
+        # dispatchable imports and hydropower, and hourly export demand
+    
+        import CA_exchange_time_series
+        CA_exchange_time_series.exchange(year)
+    
+        ############################################################################
+        #                          PNW TIME SERIES SETUP
+    
+        # Note: In future versions this can be set up differently to coordinate hourly
+        # Export time series (PNW-->CAISO) with records of dispatched imports from the
+        # CAISO market model.
     
     
+        import PNW_exchange_time_series
+        PNW_exchange_time_series.exchange(year)
     
-    import CA_data_setup2
-    CA_data_setup2.setup(year,hist,hist_year)
-
-
-    # PACIFIC NORTHWEST
-    import PNW_data_setup2
-    PNW_data_setup2.setup(year)
-
-    print(i)
+    
+        ############################################################################
+        #                          UC/ED Data File Setup
+    
+        # CALIFORNIA
+        # hist = 1 if looking at historical nuclear power production; facilitates use of
+        # monthly nuclear power generation data from EIA. Note that if hist = 0
+        # the model assumes that nuclear power plants in California have been retired.
+        hist = 0
+        hist_year = 2011
+    
+        import CA_data_setup
+        CA_data_setup.setup(year,hist,hist_year,CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,scenario,model_year,identifier)
+    
+    
+        # PACIFIC NORTHWEST
+        import PNW_data_setup
+        PNW_data_setup.setup(year,CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,scenario,model_year,identifier)
+        
+        
+        
+        import CA_data_setup2
+        CA_data_setup2.setup(year,hist,hist_year,CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,scenario,model_year,identifier)
+    
+    
+        # PACIFIC NORTHWEST
+        import PNW_data_setup2
+        PNW_data_setup2.setup(year,CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,scenario,model_year,identifier)
+    
+        print(i)
+    
+    return None
