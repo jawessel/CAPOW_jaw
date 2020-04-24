@@ -6,6 +6,7 @@ Created on Wed Sep 19 09:59:48 2018
 """
 
 import pandas as pd
+import scenario_chooser
 
 ############################################################################
 # HISTORICAL WEATHER AND STREAMFLOW ANALYSIS
@@ -16,9 +17,6 @@ import pandas as pd
 import time
 starttime = time.time()
 #import calculate_cov
-############################################################################
-
-import pandas as pd
 
 ############################################################################
 # STOCHASTIC WEATHER AND STREAMFLOW GENERATION
