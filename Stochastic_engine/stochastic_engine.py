@@ -83,6 +83,8 @@ for i in range(1,6):
     yrs = [2020,2025,2030,2035,2040,2045,2050]
     for j in yrs:
         
+        print(i,j)
+        
         #define all specific parameters using scenario chooser
         [CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,identifier] = scenario_chooser.choose(i,j)
         
@@ -140,7 +142,7 @@ for i in range(1,6):
         #
         #############################################################################
         #MODEL SETUP (UCED_setup file converted to function to iterate through each scenario/year combination)
-
+        import UCED_setup
         UCED_setup.model_setup(CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,i,j,identifier)
 
 
