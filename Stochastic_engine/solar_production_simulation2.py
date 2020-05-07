@@ -11,8 +11,9 @@ from sklearn import linear_model
 from statsmodels.tsa.arima_model import ARMA
 from datetime import datetime
 from datetime import timedelta
+import scenario_chooser
 
-def solar_sim(sim_years, PNW_solar_cap, CAISO_solar_cap):
+def solar_sim(sim_years):
 
     sim_years=sim_years+3
     df_CAISO = pd.read_excel('Synthetic_wind_power/renewables_2011_2017.xlsx',sheet_name='CAISO',header=0)
@@ -193,7 +194,7 @@ def solar_sim(sim_years, PNW_solar_cap, CAISO_solar_cap):
     
         
     #sample hourly loss patterns from historical record based on calender day
-    sim_hourly = np.zeros((NT*24,1))
+    sim_hourly_CAISO = np.zeros((NT*24,1))
     
     daily = np.reshape(daily_st_solar_CAISO,(3,365))
     daily = np.transpose(daily)
@@ -242,20 +243,13 @@ def solar_sim(sim_years, PNW_solar_cap, CAISO_solar_cap):
             
             a = st_solar[year*8760+day*24:year*8760+day*24+24,0]*(sim_solar[i*365+j]/daily[day,year])
             a = np.reshape(a,(24,1))
-            sim_hourly[i*8760+j*24:i*8760+j*24+24] = a
+            sim_hourly_CAISO[i*8760+j*24:i*8760+j*24+24] = a
             
     #impose maximum constraint
-    for i in range(0,len(sim_hourly)):
-       if sim_hourly[i] > 1:
-           sim_hourly[i] = 1
-           
-    #multiply by installed capacity
-    solar_sim = sim_hourly*CAISO_solar_cap
+    for i in range(0,len(sim_hourly_CAISO)):
+       if sim_hourly_CAISO[i] > 1:
+           sim_hourly_CAISO[i] = 1
     
-    h = int(len(solar_sim))
-    solar_sim = solar_sim[8760:h-2*8760,:]
-    S = pd.DataFrame(solar_sim)
-    S.columns = ['CAISO']
     
      #BPA simulation
     
@@ -372,7 +366,7 @@ def solar_sim(sim_years, PNW_solar_cap, CAISO_solar_cap):
     
         
     #sample hourly loss patterns from historical record based on calender day
-    sim_hourly = np.zeros((NT*24,1))
+    sim_hourly_BPA = np.zeros((NT*24,1))
     
     daily = np.reshape(daily_st_solar_BPA,(3,365))
     daily = np.transpose(daily)
@@ -421,21 +415,48 @@ def solar_sim(sim_years, PNW_solar_cap, CAISO_solar_cap):
             
             a = st_solar[year*8760+day*24:year*8760+day*24+24,1]*(sim_solar[i*365+j]/daily[day,year])
             a = np.reshape(a,(24,1))
-            sim_hourly[i*8760+j*24:i*8760+j*24+24] = a
+            sim_hourly_BPA[i*8760+j*24:i*8760+j*24+24] = a
     
     
     #impose maximum constraint
-    for i in range(0,len(sim_hourly)):
-       if sim_hourly[i] > 1:
-           sim_hourly[i] = 1
+    for i in range(0,len(sim_hourly_BPA)):
+       if sim_hourly_BPA[i] > 1:
+           sim_hourly_BPA[i] = 1
            
-    #multiply by installed capacity
-    solar_sim = sim_hourly*PNW_solar_cap
+    #iterate through each scenario
+    #Scenarios: 'MID' = Mid-Case (S1), 'EV' = High EV Adoption (S2), 'BAT' = Low Battery Storage Cost (S3)
+    #'LOWRECOST' = Low RE Cost / High Gas Price (S4), 'HIGHRECOST' = High RE Cost / Low Gas Price (S5)
     
-    h = int(len(solar_sim))
-    solar_sim = solar_sim[8760:h-2*8760,:]
-    S['BPA'] = solar_sim
+    df_S = pd.DataFrame()
+    pathways = ['MID','EV','BAT','LOWRECOST','HIGHRECOST']
     
-    S.to_csv('Synthetic_solar_power/solar_power_sim.csv')
+    for pathway in pathways:
+    
+        p_index = pathways.index(pathway)
+    
+        #iterate through each year (every 5 years from 2020-2050)
+        yrs = [2020,2025,2030,2035,2040,2045,2050]
+    
+        for year in yrs:
+        
+            #define all specific parameters using scenario chooser (only need wind capacities here)
+            [CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,identifier] = scenario_chooser.choose(pathway,year)
+    
+           
+            #multiply by installed capacity (CAISO)
+            solar_sim_CAISO = sim_hourly_CAISO*CAISO_solar_cap
+    
+            h = int(len(solar_sim_CAISO))
+            solar_sim_CAISO = solar_sim_CAISO[8760:h-2*8760,:]
+            df_S[pathway + "_" + str(year) + "_CAISO"] = solar_sim_CAISO[:,0]
+                   
+            #multiply by installed capacity (BPA)
+            solar_sim_BPA = sim_hourly_BPA*PNW_solar_cap
+            
+            h = int(len(solar_sim_BPA))
+            solar_sim_BPA = solar_sim_BPA[8760:h-2*8760,:]
+            df_S[pathway + "_" + str(year) + "_BPA"] = solar_sim_BPA[:,0]
+                  
+    df_S.to_csv('Synthetic_solar_power/solar_power_sim.csv', index = None, header = True)
     
     return None

@@ -13,6 +13,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as st
+import scenario_chooser
 
 ########################################################
 # This script uses historical records of hourly wind power
@@ -24,7 +25,7 @@ import scipy.stats as st
 # for each sub-zone (PG&E, SCE, SDGE in a separate script)
 ########################################################
 
-def wind_sim(sim_years, PNW_cap, CAISO_cap):
+def wind_sim(sim_years):
     
     sim_years = sim_years+3
     
@@ -485,20 +486,45 @@ def wind_sim(sim_years, PNW_cap, CAISO_cap):
             sim_hourly[i*8760+j*24:i*8760+j*24+24,1] = CAISO_f[day,:,year]*total_CAISO[i*365+j]
             
             dif = np.append(dif,tol)
-                  
-    #system capacity
-    BPA = PNW_cap*sim_hourly[:,0]
-    CAISO = CAISO_cap*sim_hourly[:,1]
     
-    #remove 1st year and last 2 years
-    h = int(len(BPA))
-    BPA = BPA[8760:h-2*8760]
-    CAISO = CAISO[8760:h-2*8760]
+    #iterate through each scenario
+    #Scenarios: 'MID' = Mid-Case (S1), 'EV' = High EV Adoption (S2), 'BAT' = Low Battery Storage Cost (S3)
+    #'LOWRECOST' = Low RE Cost / High Gas Price (S4), 'HIGHRECOST' = High RE Cost / Low Gas Price (S5)
     
-    # BPA represents 90% of installed wind power capacity in PNW
-    M = np.column_stack((BPA*.766,BPA,CAISO))
-    df_M = pd.DataFrame(M)
-    df_M.columns = ['BPA','PNW','CAISO']
-    df_M.to_csv('Synthetic_wind_power/wind_power_sim.csv')
+    df_M = pd.DataFrame()
+    pathways = ['MID','EV','BAT','LOWRECOST','HIGHRECOST']
+
+    for pathway in pathways:
     
+        p_index = pathways.index(pathway)
+
+        #iterate through each year (every 5 years from 2020-2050)
+        yrs = [2020,2025,2030,2035,2040,2045,2050]
+    
+        for year in yrs:
+        
+            #define all specific parameters using scenario chooser (only need wind capacities here)
+            [CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,identifier] = scenario_chooser.choose(pathway,year)
+
+              
+            #system capacity
+            BPA = PNW_wind_cap*sim_hourly[:,0]
+            CAISO = CAISO_wind_cap*sim_hourly[:,1]
+            
+            #remove 1st year and last 2 years
+            h = int(len(BPA))
+            BPA = BPA[8760:h-2*8760]
+            CAISO = CAISO[8760:h-2*8760]
+            
+            # BPA represents 90% of installed wind power capacity in PNW
+            M = np.column_stack((BPA*.766,BPA,CAISO))
+            new_columns = [pathway + "_" + str(year) + "_BPA", pathway + "_" + str(year) + "_PNW", pathway + "_" + str(year) + "_CAISO"]
+            df_M[new_columns[0]] = M[:,0]
+            df_M[new_columns[1]] = M[:,0]
+            df_M[new_columns[2]] = M[:,0]
+            #df_M.columns = ['BPA','PNW','CAISO']
+            #df_M.to_csv('Synthetic_wind_power/wind_power_sim.csv')
+            
+    df_M.to_csv('Synthetic_wind_power/wind_power_sim.csv', index = None, header = True)
+            
     return None
