@@ -103,7 +103,7 @@ def sim(days):
             instance.HorizonPath66_minflow[i] = instance.SimPath66_imports_minflow[(day-1)*24+i]  
             instance.HorizonPNW_hydro_minflow[i] = instance.SimPNW_hydro_minflow[(day-1)*24+i]
     #            
-        PNW_result = opt.solve(instance)
+        PNW_result = opt.solve(instance,tee=True,symbolic_solver_labels=True)
         instance.solutions.load_from(PNW_result)
         
         bat_ch = [] #Initializing empty charge and discharge arrays as a pre-processing step before LP
@@ -212,7 +212,7 @@ def sim(days):
                     instance2.bat_charge_on[j,t] = 0
                     instance2.bat_charge_on[j,t].fixed = True                      
     #            
-        results = opt.solve(instance2)
+        results = opt.solve(instance2,tee=True,symbolic_solver_labels=True)
         instance2.solutions.load_from(results)   
         
         

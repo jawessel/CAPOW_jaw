@@ -89,7 +89,7 @@ def sim(days):
             instance.HorizonPGE_valley_hydro_minflow[i] = instance.SimPGE_valley_hydro_minflow[(day-1)*24+i]
             instance.HorizonSCE_hydro_minflow[i] = instance.SimSCE_hydro_minflow[(day-1)*24+i]
     #
-        CAISO_result = opt.solve(instance)
+        CAISO_result = opt.solve(instance,tee=True,symbolic_solver_labels=True)
         instance.solutions.load_from(CAISO_result)
 
         bat_ch = []
@@ -203,7 +203,7 @@ def sim(days):
                     instance2.switch[j,t].fixed = True
                    
                     
-        results = opt.solve(instance2)
+        results = opt.solve(instance2,tee=True,symbolic_solver_labels=True)
         instance2.solutions.load_from(results)
 
 
