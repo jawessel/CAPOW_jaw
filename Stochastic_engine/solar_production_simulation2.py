@@ -10,7 +10,7 @@ import numpy as np
 from sklearn import linear_model
 from statsmodels.tsa.arima_model import ARMA
 from datetime import datetime
-from datetime import timedelta
+#from datetime import timedelta
 
 def solar_sim(sim_years, PNW_solar_cap, CAISO_solar_cap):
 

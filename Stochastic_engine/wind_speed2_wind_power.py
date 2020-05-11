@@ -10,9 +10,9 @@ from __future__ import division
 from sklearn import linear_model
 from statsmodels.tsa.api import VAR
 import pandas as pd
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
-import scipy.stats as st
+#import scipy.stats as st
 
 ########################################################
 # This script uses historical records of hourly wind power

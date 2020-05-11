@@ -7,13 +7,13 @@ This is a temporary script file.
 
 from __future__ import division
 from datetime import datetime
-from sklearn import linear_model
+#from sklearn import linear_model
 import pandas as pd
 import numpy as np
-import scipy.stats as st
+#import scipy.stats as st
 import statsmodels.distributions.empirical_distribution as edis
-import seaborn as sns; sns.set(color_codes=True)
-import matplotlib.pyplot as plt
+#import seaborn as sns; sns.set(color_codes=True)
+#import matplotlib.pyplot as plt
 #########################################################################
 # This purpose of this script is to use historical temperature and streamflow data
 # to calculate synthetic time series of daily flows at each of the stream gages

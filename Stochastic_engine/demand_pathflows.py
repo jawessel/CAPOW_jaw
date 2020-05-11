@@ -8,11 +8,11 @@ Created on Wed Mar 21 10:00:33 2018
 from __future__ import division
 from sklearn import linear_model
 from statsmodels.tsa.api import VAR
-import scipy.stats as st
+#import scipy.stats as st
 import pandas as pd
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
+#import seaborn as sns
 
 ######################################################################
 #                                LOAD

@@ -15,7 +15,7 @@
 ##################################################################################
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import cord
 from cord import *
 from datetime import datetime
@@ -25,7 +25,7 @@ import sys
 from configobj import ConfigObj
 import json
 from distutils.util import strtobool
-import copy
+#import copy
 
 def sim(sim_years):
     
