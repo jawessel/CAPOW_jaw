@@ -520,8 +520,8 @@ def wind_sim(sim_years):
             M = np.column_stack((BPA*.766,BPA,CAISO))
             new_columns = [pathway + "_" + str(year) + "_BPA", pathway + "_" + str(year) + "_PNW", pathway + "_" + str(year) + "_CAISO"]
             df_M[new_columns[0]] = M[:,0]
-            df_M[new_columns[1]] = M[:,0]
-            df_M[new_columns[2]] = M[:,0]
+            df_M[new_columns[1]] = M[:,1]
+            df_M[new_columns[2]] = M[:,2]
             #df_M.columns = ['BPA','PNW','CAISO']
             #df_M.to_csv('Synthetic_wind_power/wind_power_sim.csv')
             
