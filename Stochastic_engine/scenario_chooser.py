@@ -22,16 +22,17 @@ import numpy as np
 
 def choose(pathway, year):
 
-    if pathway == 1:
-        scenario = 'MID'
-    elif pathway == 2:
-        scenario = 'EV'
-    elif pathway == 3:
-        scenario = 'BAT'
-    elif pathway == 4:
-        scenario = 'LOWRECOST'
-    elif pathway == 5:
-        scenario = 'HIGHRECOST'
+#    if pathway == 1:
+#        scenario = 'MID'
+#    elif pathway == 2:
+#        scenario = 'EV'
+#    elif pathway == 3:
+#        scenario = 'BAT'
+#    elif pathway == 4:
+#        scenario = 'LOWRECOST'
+#    elif pathway == 5:
+#        scenario = 'HIGHRECOST'
+    scenario = pathway
     
     #identifier for outputting scenario parameters to excel file to be read elsewhere
     identifier = pd.DataFrame([scenario, str(year)])
