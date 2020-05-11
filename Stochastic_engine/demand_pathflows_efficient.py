@@ -23,8 +23,10 @@ df_load = pd.read_excel('Synthetic_demand_pathflows/hist_demanddata.xlsx',sheet_
 df_weather = pd.read_excel('Synthetic_demand_pathflows/hist_demanddata.xlsx',sheet_name='weather',header=0)
 BPA_weights = pd.read_excel('Synthetic_demand_pathflows/hist_demanddata.xlsx',sheet_name='BPA_location_weights',header=0)
 CAISO_weights = pd.read_excel('Synthetic_demand_pathflows/hist_demanddata.xlsx',sheet_name='CAISO_location_weights',header=0)
-df_EV = pd.read_csv('EV_load.csv',header=0,index_col=0)
+df_EV = pd.read_csv('EV_load.csv',header=0)
 sim_BPA_hydro = pd.read_csv('PNW_hydro/FCRPS/Path_dams.csv',header=None)
+sim_BPA_hydro=sim_BPA_hydro.values
+sim_BPA_hydro=np.sum(sim_BPA_hydro,axis=1)/24
 sim_wind_power=pd.read_csv('Synthetic_wind_power/wind_power_sim.csv',header=0)
 sim_Hoover = pd.read_csv('Synthetic_streamflows/synthetic_discharge_Hoover.csv',header=None)
 
@@ -159,15 +161,15 @@ X25m = M[(M[:,0] < 25),2:]
 y25m = M[(M[:,0] < 25),1]  
 
 #Create linear regBPAression object
-regBPA70p = linear_model.LinearregBPAression()
-regBPA65_70 = linear_model.LinearregBPAression()
-regBPA60_65 = linear_model.LinearregBPAression()
-regBPA55_60 = linear_model.LinearregBPAression()
-regBPA50_55 = linear_model.LinearregBPAression()
-regBPA40_50 = linear_model.LinearregBPAression()
-regBPA30_40 = linear_model.LinearregBPAression()
-regBPA25_30 = linear_model.LinearregBPAression()
-regBPA25m = linear_model.LinearregBPAression()
+regBPA70p = linear_model.LinearRegression()
+regBPA65_70 = linear_model.LinearRegression()
+regBPA60_65 = linear_model.LinearRegression()
+regBPA55_60 = linear_model.LinearRegression()
+regBPA50_55 = linear_model.LinearRegression()
+regBPA40_50 = linear_model.LinearRegression()
+regBPA30_40 = linear_model.LinearRegression()
+regBPA25_30 = linear_model.LinearRegression()
+regBPA25m = linear_model.LinearRegression()
 
 # Train the model using the training sets
 if len(y70p) > 0:
@@ -312,14 +314,14 @@ y50 = M[(M[:,0] < 50),1]
    
 
 #Create linear regression object
-regSDGE80p = linear_model.LinearregSDGEression()
-regSDGE75_80 = linear_model.LinearregSDGEression()
-regSDGE70_75 = linear_model.LinearregSDGEression()
-regSDGE65_70 = linear_model.LinearregSDGEression()
-regSDGE60_65 = linear_model.LinearregSDGEression()
-regSDGE55_60 = linear_model.LinearregSDGEression()
-regSDGE50_55 = linear_model.LinearregSDGEression()
-regSDGE50m = linear_model.LinearregSDGEression()
+regSDGE80p = linear_model.LinearRegression()
+regSDGE75_80 = linear_model.LinearRegression()
+regSDGE70_75 = linear_model.LinearRegression()
+regSDGE65_70 = linear_model.LinearRegression()
+regSDGE60_65 = linear_model.LinearRegression()
+regSDGE55_60 = linear_model.LinearRegression()
+regSDGE50_55 = linear_model.LinearRegression()
+regSDGE50m = linear_model.LinearRegression()
 
 ## Train the model using the training sets
 if len(y80p) > 0:
@@ -414,14 +416,14 @@ y50 = M[(M[:,0] < 50),1]
 ##multivariate regression
 #
 #Create linear regSCEression object
-regSCE80p = linear_model.LinearregSCEression()
-regSCE75_80 = linear_model.LinearregSCEression()
-regSCE70_75 = linear_model.LinearregSCEression()
-regSCE65_70 = linear_model.LinearregSCEression()
-regSCE60_65 = linear_model.LinearregSCEression()
-regSCE55_60 = linear_model.LinearregSCEression()
-regSCE50_55 = linear_model.LinearregSCEression()
-regSCE50m = linear_model.LinearregSCEression()
+regSCE80p = linear_model.LinearRegression()
+regSCE75_80 = linear_model.LinearRegression()
+regSCE70_75 = linear_model.LinearRegression()
+regSCE65_70 = linear_model.LinearRegression()
+regSCE60_65 = linear_model.LinearRegression()
+regSCE55_60 = linear_model.LinearRegression()
+regSCE50_55 = linear_model.LinearRegression()
+regSCE50m = linear_model.LinearRegression()
 
 ## Train the model using the training sets
 if len(y80p) > 0:
@@ -517,14 +519,14 @@ y50 = M[(M[:,0] < 50),1]
 ##multivariate regression
 #
 #Create linear regPGEVression object
-regPGEV80p = linear_model.LinearregPGEVression()
-regPGEV75_80 = linear_model.LinearregPGEVression()
-regPGEV70_75 = linear_model.LinearregPGEVression()
-regPGEV65_70 = linear_model.LinearregPGEVression()
-regPGEV60_65 = linear_model.LinearregPGEVression()
-regPGEV55_60 = linear_model.LinearregPGEVression()
-regPGEV50_55 = linear_model.LinearregPGEVression()
-regPGEV50m = linear_model.LinearregPGEVression()
+regPGEV80p = linear_model.LinearRegression()
+regPGEV75_80 = linear_model.LinearRegression()
+regPGEV70_75 = linear_model.LinearRegression()
+regPGEV65_70 = linear_model.LinearRegression()
+regPGEV60_65 = linear_model.LinearRegression()
+regPGEV55_60 = linear_model.LinearRegression()
+regPGEV50_55 = linear_model.LinearRegression()
+regPGEV50m = linear_model.LinearRegression()
 
 
 ## Train the model using the training sets
@@ -616,14 +618,14 @@ X50 = M[(M[:,0] < 50),2:]
 y50 = M[(M[:,0] < 50),1]  
 
 #Create linear regPGEBression object
-regPGEB80p = linear_model.LinearregPGEBression()
-regPGEB75_80 = linear_model.LinearregPGEBression()
-regPGEB70_75 = linear_model.LinearregPGEBression()
-regPGEB65_70 = linear_model.LinearregPGEBression()
-regPGEB60_65 = linear_model.LinearregPGEBression()
-regPGEB55_60 = linear_model.LinearregPGEBression()
-regPGEB50_55 = linear_model.LinearregPGEBression()
-regPGEB50m = linear_model.LinearregPGEBression()
+regPGEB80p = linear_model.LinearRegression()
+regPGEB75_80 = linear_model.LinearRegression()
+regPGEB70_75 = linear_model.LinearRegression()
+regPGEB65_70 = linear_model.LinearRegression()
+regPGEB60_65 = linear_model.LinearRegression()
+regPGEB55_60 = linear_model.LinearRegression()
+regPGEB50_55 = linear_model.LinearRegression()
+regPGEB50m = linear_model.LinearRegression()
 
 
 ## Train the model using the training sets
@@ -1631,7 +1633,7 @@ model = VAR(R_w)
 results = model.fit(1)
 sim_residuals = np.zeros((sim_days,cols))
 errors = np.zeros((sim_days,cols))
-p = results.params
+PARAMS = results.params
 y_seeds = R_w[-1]
 C = results.sigma_u
 means = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -1643,7 +1645,7 @@ for i in range(0,sim_days):
     
     for j in range(1,cols+1):
         name='y' + str(j) 
-        locals()[name]= p[0,j-1] + p[1,j-1]*y_seeds[0]+ p[2,j-1]*y_seeds[1]+ p[3,j-1]*y_seeds[2]+ p[4,j-1]*y_seeds[3]+ p[5,j-1]*y_seeds[4]+ p[6,j-1]*y_seeds[5]+ p[7,j-1]*y_seeds[6]+ p[8,j-1]*y_seeds[7]+ p[9,j-1]*y_seeds[8]+ p[10,j-1]*y_seeds[9]+ p[11,j-1]*y_seeds[10]+ p[12,j-1]*y_seeds[11]+ p[13,j-1]*y_seeds[12]+ p[13,j-1]*y_seeds[12]+ p[14,j-1]*y_seeds[13]+ p[15,j-1]*y_seeds[14]+E[i,j-1]
+        locals()[name]= PARAMS[0,j-1] + PARAMS[1,j-1]*y_seeds[0]+ PARAMS[2,j-1]*y_seeds[1]+ PARAMS[3,j-1]*y_seeds[2]+ PARAMS[4,j-1]*y_seeds[3]+ PARAMS[5,j-1]*y_seeds[4]+ PARAMS[6,j-1]*y_seeds[5]+ PARAMS[7,j-1]*y_seeds[6]+ PARAMS[8,j-1]*y_seeds[7]+ PARAMS[9,j-1]*y_seeds[8]+ PARAMS[10,j-1]*y_seeds[9]+ PARAMS[11,j-1]*y_seeds[10]+ PARAMS[12,j-1]*y_seeds[11]+ PARAMS[13,j-1]*y_seeds[12]+ PARAMS[13,j-1]*y_seeds[12]+ PARAMS[14,j-1]*y_seeds[13]+ PARAMS[15,j-1]*y_seeds[14]+E[i,j-1]
 
     for j in range(1,cols+1):
         name='y' + str(j) 
@@ -1706,6 +1708,7 @@ for pathway in pathways:
         
         # load relevant scenario information
         
+        scenario = pathway + '_' + str(j)
         column = pathway + '_' + str(j) + '_' + 'BPA'
         column2 = pathway + '_' + str(j) + '_' + 'CAISO'
         
@@ -1733,11 +1736,11 @@ for pathway in pathways:
             
             for n in range(0,cols):
                 
-                ys[n] = p[0,n] 
+                ys[n] = PARAMS[0,n] 
                 
                 for m in range(0,cols):
             
-                    ys[n] = ys[n] + p[m+1,n]*y_seeds[n]
+                    ys[n] = ys[n] + PARAMS[m+1,n]*y_seeds[n]
                     
                
                 ys[n] = ys[n] + E[i,n]
@@ -1846,6 +1849,7 @@ for pathway in pathways:
         
         #find average temps 
         cities = ['Fresno','Oakland','LA','SanDiego','Sacramento','SanJose','SanFran']
+        num_cities = len(cities)
         
         for i in cities:
             n1 = i + '_MaxT'
@@ -2065,8 +2069,7 @@ for pathway in pathways:
         HDD_wind_sim = np.multiply(NW_sim_W,binary_HDD_sim)
         
         #Need Month,Day,Year,8 14 3 BPA_wind，BPA_hydro
-        sim_BPA_hydro=sim_BPA_hydro.values
-        sim_BPA_hydro=np.sum(sim_BPA_hydro,axis=1)/24
+        
         
         #What is the common length
         effect_sim_year=int(len(sim_BPA_hydro)/365)
@@ -2452,11 +2455,11 @@ for pathway in pathways:
         #HDD_wind_sim=HDD_wind_sim[730:len(HDD_wind_sim)-730]
         #CDD_wind_sim=CDD_wind_sim[730:len(CDD_wind_sim)-730]
         
-        sim_Hoover=sim_Hoover.values
-        sim_Hoover = sim_Hoover[:effect_sim_year*365]
+        SH=sim_Hoover.values
+        SH = SH[:effect_sim_year*365]
         
         
-        collect_data=np.column_stack((sim_month,sim_day,sim_year,np.zeros(effect_sim_year*365),sim_dow,sim_Hoover,syn_Path65,syn_Path66))
+        collect_data=np.column_stack((sim_month,sim_day,sim_year,np.zeros(effect_sim_year*365),sim_dow,SH,syn_Path65,syn_Path66))
         collect_data_2=np.column_stack((HDD_sim,CDD_sim,HDD_wind_sim,CDD_wind_sim))
         Combined=np.column_stack((collect_data,collect_data_2))
         df_data_sim = pd.DataFrame(Combined)
@@ -2600,7 +2603,7 @@ for pathway in pathways:
         #HDD_wind_sim=HDD_wind_sim[730:len(HDD_wind_sim)-730]
         #CDD_wind_sim=CDD_wind_sim[730:len(CDD_wind_sim)-730]
         
-        collect_data=np.column_stack((sim_month,sim_day,sim_year,np.zeros(effect_sim_year*365),np.zeros(effect_sim_year*365),np.zeros(effect_sim_year*365),np.zeros(effect_sim_year*365),sim_wind_daily,sim_BPA_hydro,sim_dow,syn_Path46,sim_Hoover,syn_Path65,syn_Path66))
+        collect_data=np.column_stack((sim_month,sim_day,sim_year,np.zeros(effect_sim_year*365),np.zeros(effect_sim_year*365),np.zeros(effect_sim_year*365),np.zeros(effect_sim_year*365),sim_wind_daily,sim_BPA_hydro,sim_dow,syn_Path46,SH,syn_Path65,syn_Path66))
         collect_data_2=np.column_stack((HDD_sim,CDD_sim,HDD_wind_sim,CDD_wind_sim))
         Combined=np.column_stack((collect_data,collect_data_2))
         df_data_sim = pd.DataFrame(Combined)
@@ -2816,23 +2819,23 @@ for pathway in pathways:
             for j in range(0,365):
                 v = syn_BPA[i*365+j]*BPA_profile[:,j]
                 a = np.reshape(v,(24,1))
-                BPA_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load_BPA,(24,1))
+                BPA_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load_BPA[0:24],(24,1))
                 
                 v = syn_SDGE[i*365+j]*SDGE_profile[:,j]
                 a = np.reshape(v,(24,1))
-                SDGE_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load_CAISO,(24,1))*0.09196 #scale factor is proportional load of each zone to CA as a whole
+                SDGE_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load_CAISO[0:24],(24,1))*0.09196 #scale factor is proportional load of each zone to CA as a whole
                 
                 v = syn_SCE[i*365+j]*SCE_profile[:,j]
                 a = np.reshape(v,(24,1))
-                SCE_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load_CAISO,(24,1))*0.46037
+                SCE_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load_CAISO[0:24],(24,1))*0.46037
                 
                 v = syn_PGEV[i*365+j]*PGEV_profile[:,j]
                 a = np.reshape(v,(24,1))
-                PGEV_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load_CAISO,(24,1))*0.25528
+                PGEV_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load_CAISO[0:24],(24,1))*0.25528
                 
                 v = syn_PGEB[i*365+j]*PGEB_profile[:,j]
                 a = np.reshape(v,(24,1))
-                PGEB_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load_CAISO,(24,1))*0.19239
+                PGEB_hourly[i*8760+24*j:i*8760+24*j+24] = a + np.reshape(EV_load_CAISO[0:24],(24,1))*0.19239
                     
         #Scale BPA demand up to PNW region wide total
         import PNW_demand_scaling
@@ -2846,8 +2849,8 @@ for pathway in pathways:
         Combined = np.column_stack((BPA_hourly,PNW_hourly,SDGE_hourly,SCE_hourly,PGEV_hourly,PGEB_hourly))
         df_C = pd.DataFrame(Combined)
         df_C.columns = ['BPA','PNW','SDGE','SCE','PGE_valley','PGE_bay']
-        df_C.to_csv('Synthetic_demand_pathflows/Sim_hourly_load.csv')
-        
+        filename = 'Synthetic_demand_pathflows/Sim_hourly_load_' + scenario + '.csv'
+        df_C.to_csv(filename)
         
         #plt.figure()
         #sns.distplot(NWPaths_y[:,0], color="skyblue", label="Hist")

@@ -458,5 +458,5 @@ def solar_sim(sim_years):
             df_S[pathway + "_" + str(year) + "_BPA"] = solar_sim_BPA[:,0]
                   
     df_S.to_csv('Synthetic_solar_power/solar_power_sim.csv', index = None, header = True)
-    
+        
     return None
