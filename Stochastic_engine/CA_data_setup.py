@@ -20,8 +20,8 @@ def setup(year,scenario):
     #read transmission path parameters into DataFrame
     df_paths = pd.read_csv('CA_data_file/paths.csv',header=0)
     
-    #calendar
-    df_calendar = pd.read_excel('CA_data_file/calendar.xlsx',header=0)
+#    #calendar
+#    df_calendar = pd.read_excel('CA_data_file/calendar.xlsx',header=0)
     
     #list zones
     zones = ['PGE_valley', 'PGE_bay', 'SCE', 'SDGE']
@@ -46,8 +46,8 @@ def setup(year,scenario):
     
     ##time series of wind generation for each zone
     df_wind = pd.read_csv('Synthetic_wind_power/wind_power_sim.csv',header=0)
-    header = 
-    df_wind = df_wind.loc[:,'CAISO']
+    header = scenario + '_CAISO'
+    df_wind = df_wind.loc[:,header]
     df_wind = df_wind.loc[year*8760:year*8760+8759]
     df_wind = df_wind.reset_index()
     wind_caps = pd.read_excel('CA_data_file/wind_caps.xlsx')
@@ -55,15 +55,19 @@ def setup(year,scenario):
     
     ##time series solar for each TAC
     df_solar = pd.read_csv('Synthetic_solar_power/solar_power_sim.csv',header=0)
+    header = scenario + '_CAISO'
+    df_solar = df_solar.loc[:,header]
     df_solar = df_solar.loc[year*8760:year*8760+8759]
     df_solar = df_solar.reset_index()
     solar_caps = pd.read_excel('CA_data_file/solar_caps.xlsx')
     
     ##daily time series of dispatchable imports by path
-    df_imports = pd.read_csv('Path_setup/CA_dispatchable_imports.csv',header=0)
+    filename = 'Path_setup/CA_dispatchable_imports_' + scenario + '.csv'
+    df_imports = pd.read_csv(filename,header=0)
     
     ##hourly time series of exports by zone
-    df_exports = pd.read_csv('Path_setup/CA_exports.csv',header=0)
+    filename = 'Path_setup/CA_exports_' + scenario + '.csv'
+    df_exports = pd.read_csv(filename,header=0)
     
     #must run resources (LFG,ag_waste,nuclear)
     df_must = pd.read_excel('CA_data_file/must_run.xlsx',header=0)
@@ -75,14 +79,12 @@ def setup(year,scenario):
     df_ng = df_ng.reset_index()
     
     #california imports hourly minimum flows
-    df_CA_import_mins = pd.read_csv('Path_setup/CA_path_mins.csv', header=0)
+    filename = 'Path_setup/CA_path_mins_' + scenario + '.csv'
+    df_CA_import_mins = pd.read_csv(scenario, header=0)
     
     #california hydro hourly minimum flows
     df_CA_hydro_mins = pd.read_csv('Hydro_setup/CA_hydro_mins.csv', header=0)
-    
-    #list plant types
-    types = ['ngct', 'ngcc', 'ngst', 'coal','oil', 'psh', 'slack', 'imports','hydro']
-    
+      
     # must run generation
     must_run_PGE_bay = np.ones((len(df_load),1))*df_must.loc[0,'PGE_bay']
     must_run_PGE_valley = np.ones((len(df_load),1))*df_must.loc[0,'PGE_valley']
@@ -102,7 +104,7 @@ def setup(year,scenario):
     from pathlib import Path
     
     
-    path=str(Path.cwd().parent) +str (Path('/UCED/LR/S' + str(scenario) + '/' + str(model_year) + '/CA' + str(year)))
+    path=str(Path.cwd().parent) +str (Path('/UCED/LR/' + str(scenario) + '/CA' + str(year)))
     os.makedirs(path,exist_ok=True)
     
     generators_file='CA_data_file/generators.csv'
@@ -113,11 +115,11 @@ def setup(year,scenario):
     emission_cal_file='../UCED/CA_emission_calculation.py'
     emission_gen_file = '../UCED/CA_emissions_generator.csv'
     
-    with ExcelWriter('scenario_parameters.xlsx') as writer:
-        df_bat_params.to_excel(writer, sheet_name='Capacities')
-        ev_df.to_excel(writer, sheet_name='EV Load Profiles')
-        identifier.to_excel(writer, sheet_name='Scenario and Year')
-    scenario_param_file = 'scenario_parameters.xlsx'
+#    with ExcelWriter('scenario_parameters.xlsx') as writer:
+#        df_bat_params.to_excel(writer, sheet_name='Capacities')
+#        ev_df.to_excel(writer, sheet_name='EV Load Profiles')
+#        identifier.to_excel(writer, sheet_name='Scenario and Year')
+#    scenario_param_file = 'scenario_parameters.xlsx'
     
     copy(dispatch_file,path)
     copy(wrapper_file,path)
@@ -126,7 +128,7 @@ def setup(year,scenario):
     copy(dispatchLP_file,path)
     copy(generators_file,path)
     copy(emission_gen_file,path)
-    copy(scenario_param_file,path)
+#    copy(scenario_param_file,path)
     
     filename = path + '/data.dat'
     with open(filename, 'w') as f:

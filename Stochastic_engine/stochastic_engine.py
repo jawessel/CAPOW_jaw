@@ -44,28 +44,28 @@ starttime = time.time()
 ## Now specify a smaller subset of stochastic data to run (must be <= stoch years)
 sim_years = 1
 #
-## Run ORCA to get California storage dam releases
-#import main
-#main.sim(sim_years)
-#print('ORCA')
-##
-## California Hydropower model
-#import CA_hydropower
-#CA_hydropower.hydro(sim_years)
-#print('CA hydropower')
+# Run ORCA to get California storage dam releases
+import main
+main.sim(sim_years)
+print('ORCA')
 #
-##Willamette operational model
-#import Willamette_launch
-#Willamette_launch.launch(sim_years)
-#print('Willamette')
-#
-#
-## Federal Columbia River Power System Model (mass balance in Python)
-#import ICF_calc_new
-#ICF_calc_new.calc(sim_years)
-#import FCRPS_New
-#FCRPS_New.simulate(sim_years)
-#print('FCRPS')
+# California Hydropower model
+import CA_hydropower
+CA_hydropower.hydro(sim_years)
+print('CA hydropower')
+
+#Willamette operational model
+import Willamette_launch
+Willamette_launch.launch(sim_years)
+print('Willamette')
+
+
+# Federal Columbia River Power System Model (mass balance in Python)
+import ICF_calc_new
+ICF_calc_new.calc(sim_years)
+import FCRPS_New
+FCRPS_New.simulate(sim_years)
+print('FCRPS')
 
 #############################################################################
 #
