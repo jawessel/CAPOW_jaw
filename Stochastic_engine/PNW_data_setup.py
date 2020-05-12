@@ -9,17 +9,15 @@ import pandas as pd
 import numpy as np
 from pandas import ExcelWriter
 
-def setup(year,CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,scenario,model_year,identifier):
+def setup(year,scenario,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
 
     #read generator parameters into DataFrame
     df_gen = pd.read_csv('PNW_data_file/generators.csv',header=0)
 
-    #read in battery parameters
-    df_bat_params = pd.DataFrame([CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff],index=['CAISO_wind_cap','CAISO_solar_cap','CAISO_bat_cap','PNW_wind_cap','PNW_solar_cap','PNW_bat_cap','bat_RoC_coeff','bat_RoD_coeff','bat_eff'], columns = ['Value (MW)'])
-
     zone = ['PNW']
     ##time series of load for each zone
-    df_load = pd.read_csv('Synthetic_demand_pathflows/Sim_hourly_load.csv',header=0)
+    filename = 'Synthetic_demand_pathflows/Sim_hourly_load' + scenario + '.csv'
+    df_load = pd.read_csv(filename,header=0)
     df_load = df_load[zone]
     df_load = df_load.loc[year*8760:year*8760+8759,:]
     df_load = df_load.reset_index(drop=True)
@@ -37,7 +35,8 @@ def setup(year,CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_sol
 
     ##time series of wind generation for each zone
     df_wind = pd.read_csv('Synthetic_wind_power/wind_power_sim.csv',header=0)
-    df_wind = df_wind.loc[:,'PNW']
+    header = scenario + '_PNW'
+    df_wind = df_wind.loc[:,header]
     df_wind = df_wind.loc[year*8760:year*8760+8759]
     df_wind = df_wind.reset_index()
 

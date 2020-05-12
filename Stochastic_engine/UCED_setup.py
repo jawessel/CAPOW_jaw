@@ -84,22 +84,22 @@ def model_setup(pathway,model_year):
         # the model assumes that nuclear power plants in California have been retired.
         
         import CA_data_setup
-        CA_data_setup.setup(scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff)
+        CA_data_setup.setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff)
     
     
         # PACIFIC NORTHWEST
         import PNW_data_setup
-        PNW_data_setup.setup(scenario,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff)
+        PNW_data_setup.setup(year,scenario,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff)
         
         
         
-        import CA_data_setup2
-        CA_data_setup2.setup(scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff)
+#        import CA_data_setup2
+#        CA_data_setup2.setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff)
     
     
-        # PACIFIC NORTHWEST
-        import PNW_data_setup2
-        PNW_data_setup2.setup(scenario,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff)
+#        # PACIFIC NORTHWEST
+#        import PNW_data_setup2
+#        PNW_data_setup2.setup(year,scenario,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff)
     
         print(i)
     
