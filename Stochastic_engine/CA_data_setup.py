@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 from pandas import ExcelWriter
 
-def setup(year,hist,hist_year,CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,scenario,model_year,identifier):
+def setup(year,scenario):
 
     #read generator parameters into DataFrame
     df_gen = pd.read_csv('CA_data_file/generators.csv',header=0)
@@ -27,7 +27,8 @@ def setup(year,hist,hist_year,CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_w
     zones = ['PGE_valley', 'PGE_bay', 'SCE', 'SDGE']
     
     ##time series of load for each zone
-    df_load = pd.read_csv('Synthetic_demand_pathflows/Sim_hourly_load.csv',header=0)
+    filename = 'Synthetic_demand_pathflows/Sim_hourly_load' + scenario + '.csv'
+    df_load = pd.read_csv(filename,header=0)
     df_load = df_load[zones]
     df_load = df_load.loc[year*8760:year*8760+8759]
     df_load = df_load.reset_index(drop=True)
@@ -45,6 +46,7 @@ def setup(year,hist,hist_year,CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_w
     
     ##time series of wind generation for each zone
     df_wind = pd.read_csv('Synthetic_wind_power/wind_power_sim.csv',header=0)
+    header = 
     df_wind = df_wind.loc[:,'CAISO']
     df_wind = df_wind.loc[year*8760:year*8760+8759]
     df_wind = df_wind.reset_index()
@@ -82,49 +84,15 @@ def setup(year,hist,hist_year,CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_w
     types = ['ngct', 'ngcc', 'ngst', 'coal','oil', 'psh', 'slack', 'imports','hydro']
     
     # must run generation
-    must_run_PGE_valley = []
-    must_run_PGE_bay = []
-    must_run_SCE = []
-    must_run_SDGE = []
-    
-    # This section can be used in historical runs to edit monthly availability
-    # of nuclear power plants
-    
-    if hist > 0:
-    
-        caps = pd.read_excel('CA_data_file/must_run.xlsx',sheet_name='nucs',header=0)
-        y_cap = caps[caps['Year'] == hist_year]
-    
-        for i in range(0,len(df_calendar)):
-            month = df_calendar.loc[i,'Month']
-            a = y_cap[y_cap['Month']==month]
-            pc = a['PGE_valley']
-            a = y_cap[y_cap['Month']==month]
-            sc = a['SCE']
-            a = y_cap[y_cap['Month']==month]
-            sdc = a['SDGE']
-    
-            must_run_SCE = np.append(must_run_SCE,sc+df_must.loc[0,'SCE'])
-            must_run_SDGE = np.append(must_run_SDGE,sdc+df_must.loc[0,'SDGE'])
-            must_run_PGE_valley = np.append(must_run_PGE_valley,pc+df_must.loc[0,'PGE_valley'])
-    
-        must_run_PGE_bay = np.ones((len(df_load),1))*df_must.loc[0,'PGE_bay']
-    
-        must_run = np.column_stack((must_run_PGE_valley,must_run_PGE_bay,must_run_SCE,must_run_SDGE))
-        df_total_must_run =pd.DataFrame(must_run,columns=('PGE_valley','PGE_bay','SCE','SDGE'))
-        df_total_must_run.to_csv('CA_data_file/must_run_hourly.csv')
-    
-    else:
-    
-        must_run_PGE_bay = np.ones((len(df_load),1))*df_must.loc[0,'PGE_bay']
-        must_run_PGE_valley = np.ones((len(df_load),1))*df_must.loc[0,'PGE_valley']
-        must_run_SCE = np.ones((len(df_load),1))*df_must.loc[0,'SCE']
-        must_run_SDGE = np.ones((len(df_load),1))*df_must.loc[0,'SDGE']
-        must_run = np.column_stack((must_run_PGE_valley,must_run_PGE_bay,must_run_SCE,must_run_SDGE))
-        df_total_must_run =pd.DataFrame(must_run,columns=('PGE_valley','PGE_bay','SCE','SDGE'))
-        df_total_must_run.to_csv('CA_data_file/must_run_hourly.csv')
-    
-    
+    must_run_PGE_bay = np.ones((len(df_load),1))*df_must.loc[0,'PGE_bay']
+    must_run_PGE_valley = np.ones((len(df_load),1))*df_must.loc[0,'PGE_valley']
+    must_run_SCE = np.ones((len(df_load),1))*df_must.loc[0,'SCE']
+    must_run_SDGE = np.ones((len(df_load),1))*df_must.loc[0,'SDGE']
+    must_run = np.column_stack((must_run_PGE_valley,must_run_PGE_bay,must_run_SCE,must_run_SDGE))
+    df_total_must_run =pd.DataFrame(must_run,columns=('PGE_valley','PGE_bay','SCE','SDGE'))
+    df_total_must_run.to_csv('CA_data_file/must_run_hourly.csv')
+
+
     ############
     #  sets    #
     ############

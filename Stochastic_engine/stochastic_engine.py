@@ -116,20 +116,29 @@ NG = pd.DataFrame(ng)
 NG.columns = ['SCE','SDGE','PGE_valley','PGE_bay','PNW']
 NG.to_excel('Gas_prices/NG.xlsx')
 
-#open .csv file with scenario parameters
+#Scenarios: 'MID' = Mid-Case (S1), 'EV' = High EV Adoption (S2), 'BAT' = Low Battery Storage Cost (S3)
+#   'LOWRECOST' = Low RE Cost / High Gas Price (S4), 'HIGHRECOST' = High RE Cost / Low Gas Price (S5)
+pathways = ['MID','EV','BAT','LOWRECOST','HIGHRECOST']
 
-for i in range(1,6):
+for pathway in pathways:
+    
+    p_index = pathways.index(pathway)
 
     #iterate through each year (every 5 years from 2020-2050)
     yrs = [2020,2025,2030,2035,2040,2045,2050]
+    
     for j in yrs:
+        
+        # load relevant scenario information
+        
+        scenario = pathway + '_' + str(j)
         
         #############################################################################
         #
         #############################################################################
         #MODEL SETUP (UCED_setup file converted to function to iterate through each scenario/year combination)
         import UCED_setup
-        UCED_setup.model_setup(CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,i,j,identifier)
+        UCED_setup.model_setup(pathway,j)
 
 
 

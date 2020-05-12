@@ -8,9 +8,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-def exchange(year):
+def exchange(year,scenario):
 
-    df_data = pd.read_csv('Synthetic_demand_pathflows/Load_Path_Sim.csv',header=0)
+    filename = 'Synthetic_demand_pathflows/Load_Path_Sim_' + scenario + '.csv' 
+    df_data = pd.read_csv(filename,header=0)
     c = ['Path3_sim','Path8_sim','Path14_sim','Path65_sim','Path66_sim']
     df_data = df_data[c]
     paths = ['Path3','Path8','Path14','Path65','Path66']
@@ -34,8 +35,8 @@ def exchange(year):
                 if imports.loc[i,p] < 0:
                     imports.loc[i,p] = 0
     
-    imports.to_csv('Path_setup/PNW_imports.csv')
-    
+    filename = 'Path_setup/PNW_imports_' + scenario + '.csv'
+    imports.to_csv(filename)
     
     # convert to minimum flow time series and dispatchable (daily)
     df_mins = pd.read_excel('Path_setup/PNW_imports_minflow_profiles.xlsx',header=0)
@@ -54,8 +55,7 @@ def exchange(year):
     dispatchable_imports = imports*24
     dispatchable_imports.to_csv('Path_setup/PNW_dispatchable_imports.csv')
     
-    
-    df_data = pd.read_csv('Path_setup/PNW_imports.csv',header=0)
+    df_data = imports.copy(deep=True)
     
     # hourly minimum flow for paths
     hourly = np.zeros((8760,len(lines)))
@@ -68,10 +68,12 @@ def exchange(year):
             
     H = pd.DataFrame(hourly)
     H.columns = ['Path3','Path8','Path14','Path65','Path66']
-    H.to_csv('Path_setup/PNW_path_mins.csv')
+    filename = 'Path_setup/PNW_path_mins_' + scenario + '.csv'
+    H.to_csv(filename)
     
     # hourly exports
-    df_data = pd.read_csv('Synthetic_demand_pathflows/Load_Path_Sim.csv',header=0)
+    filename = 'Synthetic_demand_pathflows/Load_Path_Sim_' + scenario + '.csv'
+    df_data = pd.read_csv(filename,header=0)
     c = ['Path3_sim','Path8_sim','Path14_sim','Path65_sim','Path66_sim']
     df_data = df_data[c]
     df_data.columns = [paths]
@@ -101,8 +103,8 @@ def exchange(year):
             e[i,3] = 3800
     exports = pd.DataFrame(e) 
     exports.columns = ['Path3','Path8','Path14','Path65','Path66']
-    exports.to_csv('Path_setup/PNW_exports.csv')
-    
+    filename = 'Path_setup/PNW_exports_' + scenario + '.csv'
+    exports.to_csv(filename)
     
     
     ##########################

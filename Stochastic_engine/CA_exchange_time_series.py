@@ -9,9 +9,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-def exchange(year):
-
-    df_data = pd.read_csv('Synthetic_demand_pathflows/Load_Path_Sim.csv',header=0)
+def exchange(year,scenario):
+    
+    filename = 'Synthetic_demand_pathflows/Load_Path_Sim_' + scenario + '.csv'    
+    df_data = pd.read_csv(filename,header=0)
     c = ['Path66_sim','Path46_sim','Path61_sim','Path42_sim','Path24_sim','Path45_sim']
     df_data = df_data[c]
     paths = ['Path66','Path46','Path61','Path42','Path24','Path45']
@@ -43,7 +44,9 @@ def exchange(year):
                     
                     
     imports.rename(columns={'Path46':'Path46_SCE'}, inplace=True)
-    imports.to_csv('Path_setup/CA_imports.csv')
+    
+    filename = 'Path_setup/CA_imports_' + scenario + '.csv'
+    imports.to_csv(filename)
     
     # convert to minimum flow time series and dispatchable (daily)
     df_mins = pd.read_excel('Path_setup/CA_imports_minflow_profiles.xlsx',header=0)
@@ -62,7 +65,7 @@ def exchange(year):
     dispatchable_imports = imports*24
     dispatchable_imports.to_csv('Path_setup/CA_dispatchable_imports.csv')
     
-    df_data = pd.read_csv('Path_setup/CA_imports.csv',header=0)
+    df_data = imports.copy(deep=True)
     
     # hourly minimum flow for paths
     hourly = np.zeros((8760,len(lines)))
@@ -75,10 +78,12 @@ def exchange(year):
             
     H = pd.DataFrame(hourly)
     H.columns = ['Path66','Path46_SCE','Path61','Path42']
-    H.to_csv('Path_setup/CA_path_mins.csv')
+    filename = 'Path_setup/CA_path_mins_' + scenario + '.csv'
+    H.to_csv(filename)
     
     # hourly exports
-    df_data = pd.read_csv('Synthetic_demand_pathflows/Load_Path_Sim.csv',header=0)
+    filename = 'Synthetic_demand_pathflows/Load_Path_Sim_' + scenario + '.csv'
+    df_data = pd.read_csv(filename,header=0)
     c = ['Path66_sim','Path46_sim','Path61_sim','Path42_sim','Path24_sim','Path45_sim']
     df_data = df_data[c]
     df_data.columns = [paths]
@@ -124,7 +129,8 @@ def exchange(year):
     
     exports = pd.DataFrame(e) 
     exports.columns = ['Path42','Path24','Path45','Path66']
-    exports.to_csv('Path_setup/CA_exports.csv')
+    filename = 'Path_setup/CA_exports_' + scenario + '.csv'
+    exports.to_csv(filename)
     
     
     
