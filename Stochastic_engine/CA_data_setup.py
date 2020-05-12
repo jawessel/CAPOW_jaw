@@ -24,7 +24,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
     zones = ['PGE_valley', 'PGE_bay', 'SCE', 'SDGE']
     
     ##time series of load for each zone
-    filename = 'Synthetic_demand_pathflows/Sim_hourly_load' + scenario + '.csv'
+    filename = 'Synthetic_demand_pathflows/Sim_hourly_load_' + scenario + '.csv'
     df_load = pd.read_csv(filename,header=0)
     df_load = df_load[zones]
     df_load = df_load.loc[year*8760:year*8760+8759]
@@ -77,7 +77,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
     
     #california imports hourly minimum flows
     filename = 'Path_setup/CA_path_mins_' + scenario + '.csv'
-    df_CA_import_mins = pd.read_csv(scenario, header=0)
+    df_CA_import_mins = pd.read_csv(filename, header=0)
     
     #california hydro hourly minimum flows
     df_CA_hydro_mins = pd.read_csv('Hydro_setup/CA_hydro_mins.csv', header=0)
@@ -359,7 +359,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
             wz = wind_caps.loc[0,z]
             for h in range(0,len(df_load)):
                 f.write(z + '\t' + str(h+1) + '\t' + str(df_load.loc[h,z])\
-                + '\t' + str(df_wind.loc[h,'CAISO']*wz) + '\t' + str(df_solar.loc[h,'CAISO']*sz)\
+                + '\t' + str(df_wind[h]*wz) + '\t' + str(df_solar[h]*sz)\
                 + '\t' + str(df_total_must_run.loc[h,z]) + '\n')
         f.write(';\n\n')
     
@@ -386,7 +386,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
         
         ####################################################
         
-            filename = path + '/dataLP.dat'
+    filename = path + '/dataLP.dat'
     with open(filename, 'w') as f:
 
         # generator sets by zone
@@ -600,7 +600,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
             wz = wind_caps.loc[0,z]
             for h in range(0,len(df_load)):
                 f.write(z + '\t' + str(h+1) + '\t' + str(df_load.loc[h,z])\
-                + '\t' + str(df_wind.loc[h,'CAISO']*wz) + '\t' + str(df_solar.loc[h,'CAISO']*sz)\
+                + '\t' + str(df_wind[h]*wz) + '\t' + str(df_solar[h]*sz)\
                 + '\t' + str(df_total_must_run.loc[h,z]) + '\n')
         f.write(';\n\n')
 

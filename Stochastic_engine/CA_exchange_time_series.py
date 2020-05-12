@@ -63,7 +63,8 @@ def exchange(year,scenario):
                 imports.loc[i,L] = np.max((0,imports.loc[i,L]-df_mins.loc[i,L]))
     
     dispatchable_imports = imports*24
-    dispatchable_imports.to_csv('Path_setup/CA_dispatchable_imports.csv')
+    filename = 'Path_setup/CA_dispatchable_imports_' + scenario + '.csv'
+    dispatchable_imports.to_csv(filename)
     
     df_data = imports.copy(deep=True)
     
