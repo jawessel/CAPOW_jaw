@@ -23,9 +23,10 @@ starttime = time.time()
 ## Specify a number of synthetic weather years to be simulated. Then
 ## edit the /cord/data/input/base_inflows.json file, specifying the start and end 
 ## dates of the forecast_exp scenario flow files. Start date must be 1/1/1901.
-## End dates must be stoch_years + 3 after start date. 
+## End dates (stoch_years) must be + 3 years beyond desired end of simulation. Note that
+## inflow files for ORCA (input/forecast_flows.csv) needs to include leap days. 
 #
-#stoch_years=1000
+#stoch_years=100
 #
 ## Generate synthetic weather (wind speed and temperature) records. 
 #import synthetic_temp_wind_v3
