@@ -50,8 +50,8 @@ def model_setup(pathway,model_year):
     [CAISO_wind_cap,CAISO_solar_cap,CAISO_bat_cap,PNW_wind_cap,PNW_solar_cap,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff,ev_df,identifier] = scenario_chooser.choose(pathway,model_year)
 
     
-    for i in range(0,1):   
-#    for i in range(0,int(sim_years)):
+#    for i in range(0,1):   
+    for i in range(0,int(sim_years)):
         year=int(i)
     
         ############################################################################
