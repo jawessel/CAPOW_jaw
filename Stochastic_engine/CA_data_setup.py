@@ -7,7 +7,6 @@ Created on Wed May 03 15:01:31 2017
 
 import pandas as pd
 import numpy as np
-from pandas import ExcelWriter
 
 def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
 
@@ -17,8 +16,8 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
     #read transmission path parameters into DataFrame
     df_paths = pd.read_csv('CA_data_file/paths.csv',header=0)
     
-#    #calendar
-#    df_calendar = pd.read_excel('CA_data_file/calendar.xlsx',header=0)
+    #    #calendar
+    #    df_calendar = pd.read_excel('CA_data_file/calendar.xlsx',header=0)
     
     #list zones
     zones = ['PGE_valley', 'PGE_bay', 'SCE', 'SDGE']
@@ -46,7 +45,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
     header = scenario + '_CAISO'
     df_wind = df_wind.loc[:,header]
     df_wind = df_wind.loc[year*8760:year*8760+8759]
-    df_wind = df_wind.reset_index()
+    df_wind = df_wind.reset_index(drop=True)
     wind_caps = pd.read_excel('CA_data_file/wind_caps.xlsx')
     
     
@@ -55,7 +54,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
     header = scenario + '_CAISO'
     df_solar = df_solar.loc[:,header]
     df_solar = df_solar.loc[year*8760:year*8760+8759]
-    df_solar = df_solar.reset_index()
+    df_solar = df_solar.reset_index(drop=True)
     solar_caps = pd.read_excel('CA_data_file/solar_caps.xlsx')
     
     ##daily time series of dispatchable imports by path
@@ -73,7 +72,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
     df_ng = pd.read_excel('Gas_prices/NG.xlsx', header=0)
     df_ng = df_ng[zones]
     df_ng = df_ng.loc[year*365:year*365+364,:]
-    df_ng = df_ng.reset_index()
+    df_ng = df_ng.reset_index(drop=True)
     
     #california imports hourly minimum flows
     filename = 'Path_setup/CA_path_mins_' + scenario + '.csv'
@@ -90,8 +89,8 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
     must_run = np.column_stack((must_run_PGE_valley,must_run_PGE_bay,must_run_SCE,must_run_SDGE))
     df_total_must_run =pd.DataFrame(must_run,columns=('PGE_valley','PGE_bay','SCE','SDGE'))
     df_total_must_run.to_csv('CA_data_file/must_run_hourly.csv')
-
-
+    
+    
     ############
     #  sets    #
     ############
@@ -112,11 +111,11 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
     emission_cal_file='../UCED/CA_emission_calculation.py'
     emission_gen_file = '../UCED/CA_emissions_generator.csv'
     
-#    with ExcelWriter('scenario_parameters.xlsx') as writer:
-#        df_bat_params.to_excel(writer, sheet_name='Capacities')
-#        ev_df.to_excel(writer, sheet_name='EV Load Profiles')
-#        identifier.to_excel(writer, sheet_name='Scenario and Year')
-#    scenario_param_file = 'scenario_parameters.xlsx'
+    #    with ExcelWriter('scenario_parameters.xlsx') as writer:
+    #        df_bat_params.to_excel(writer, sheet_name='Capacities')
+    #        ev_df.to_excel(writer, sheet_name='EV Load Profiles')
+    #        identifier.to_excel(writer, sheet_name='Scenario and Year')
+    #    scenario_param_file = 'scenario_parameters.xlsx'
     
     copy(dispatch_file,path)
     copy(wrapper_file,path)
@@ -125,7 +124,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
     copy(dispatchLP_file,path)
     copy(generators_file,path)
     copy(emission_gen_file,path)
-#    copy(scenario_param_file,path)
+    #    copy(scenario_param_file,path)
     
     filename = path + '/data.dat'
     with open(filename, 'w') as f:
@@ -350,10 +349,6 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
         f.write(';\n\n')
         #scale factor for capacity is proportional load of each zone to CA as a whole
         
-        
-        START HERE NEED VRE CAPS
-        
-        
         # times series data
         # zonal (hourly)
         f.write('param:' + '\t' + 'SimDemand' + '\t' + 'SimWind' \
@@ -362,9 +357,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
             sz = solar_caps.loc[0,z]
             wz = wind_caps.loc[0,z]
             for h in range(0,len(df_load)):
-                f.write(z + '\t' + str(h+1) + '\t' + str(df_load.loc[h,z])\
-                + '\t' + str(df_wind[h,scenario]*wz) + '\t' + str(df_solar[h,scenario]*sz)\
-                + '\t' + str(df_total_must_run.loc[h,z]) + '\n')
+                f.write(z + '\t' + str(h+1) + '\t' + str(df_load.loc[h,z]) + '\t' + str(df_wind[h]*wz) + '\t' + str(df_solar[h]*sz) + '\t' + str(df_total_must_run.loc[h,z]) + '\n')
         f.write(';\n\n')
     
         # zonal (daily)
@@ -392,7 +385,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
         
     filename = path + '/dataLP.dat'
     with open(filename, 'w') as f:
-
+    
         # generator sets by zone
         for z in zones:
             # zone string
@@ -405,7 +398,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
                     unit_name = unit_name.replace(' ','_')
                     f.write(unit_name + ' ')
             f.write(';\n\n')
-
+    
         # WECC imports
         f.write('set WECCImportsSCE :=\n')
         # pull relevant generators
@@ -415,7 +408,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
                 unit_name = unit_name.replace(' ','_')
                 f.write(unit_name + ' ')
         f.write(';\n\n')
-
+    
         # WECC imports
         f.write('set WECCImportsSDGE :=\n')
         # pull relevant generators
@@ -425,7 +418,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
                 unit_name = unit_name.replace(' ','_')
                 f.write(unit_name + ' ')
         f.write(';\n\n')
-
+    
         # WECC imports
         f.write('set WECCImportsPGEV :=\n')
         # pull relevant generators
@@ -435,7 +428,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
                 unit_name = unit_name.replace(' ','_')
                 f.write(unit_name + ' ')
         f.write(';\n\n')
-
+    
         # generator sets by type
         # coal
         f.write('set Coal :=\n')
@@ -446,7 +439,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
                 unit_name = unit_name.replace(' ','_')
                 f.write(unit_name + ' ')
         f.write(';\n\n')
-
+    
         # oil
         f.write('set Oil :=\n')
         # pull relevant generators
@@ -456,7 +449,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
                 unit_name = unit_name.replace(' ','_')
                 f.write(unit_name + ' ')
         f.write(';\n\n')
-
+    
         # Pumped Storage
         f.write('set PSH :=\n')
         # pull relevant generators
@@ -466,7 +459,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
                 unit_name = unit_name.replace(' ','_')
                 f.write(unit_name + ' ')
         f.write(';\n\n')
-
+    
         # Slack
         f.write('set Slack :=\n')
         # pull relevant generators
@@ -476,7 +469,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
                 unit_name = unit_name.replace(' ','_')
                 f.write(unit_name + ' ')
         f.write(';\n\n')
-
+    
         # Hydro
         f.write('set Hydro :=\n')
         # pull relevant generators
@@ -486,7 +479,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
                 unit_name = unit_name.replace(' ','_')
                 f.write(unit_name + ' ')
         f.write(';\n\n')
-
+    
         # Ramping
         f.write('set Ramping :=\n')
         # pull relevant generators
@@ -496,13 +489,13 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
                 unit_name = unit_name.replace(' ','_')
                 f.write(unit_name + ' ')
         f.write(';\n\n')
-
-
+    
+    
         # gas generator sets by zone and type
         for z in zones:
             # zone string
             z_int = zones.index(z)
-
+    
             # Natural Gas
             # find relevant generators
             trigger = 0
@@ -518,30 +511,30 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
                         unit_name = unit_name.replace(' ','_')
                         f.write(unit_name + ' ')
                 f.write(';\n\n')
-
-
+    
+    
         # zones
         f.write('set zones :=\n')
         for z in zones:
             f.write(z + ' ')
         f.write(';\n\n')
-
+    
         # sources
         f.write('set sources :=\n')
         for z in zones:
             f.write(z + ' ')
         f.write(';\n\n')
-
+    
         # sinks
         f.write('set sinks :=\n')
         for z in zones:
             f.write(z + ' ')
         f.write(';\n\n')
-
+    
     ################
     #  parameters  #
     ################
-
+    
         # simulation details
         SimHours = 8760
         f.write('param SimHours := %d;' % SimHours)
@@ -554,9 +547,9 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
         HorizonDays = int(HorizonHours/24)
         f.write('param HorizonDays := %d;' % HorizonDays)
         f.write('\n\n')
-
-
-
+    
+    
+    
         # create parameter matrix for transmission paths (source and sink connections)
         f.write('param:' + '\t' + 'limit' + '\t' +'hurdle :=' + '\n')
         for z in zones:
@@ -575,7 +568,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
                     f.write('0' + '\t' + '0' + '\n')
         f.write(';\n\n')
         
-
+    
     # create parameter matrix for generators
         f.write('param:' + '\t')
         for c in df_gen.columns:
@@ -591,7 +584,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
                 else:
                     f.write(str((df_gen.loc[i,c])) + '\t')
             f.write('\n')
-
+    
         f.write(';\n\n')
         
         
@@ -604,30 +597,30 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
             wz = wind_caps.loc[0,z]
             for h in range(0,len(df_load)):
                 f.write(z + '\t' + str(h+1) + '\t' + str(df_load.loc[h,z])\
-                + '\t' + str(df_wind[h,scenario]*wz) + '\t' + str(df_solar[h,scenario]*sz)\
+                + '\t' + str(df_wind[h]*wz) + '\t' + str(df_solar[h]*sz)\
                 + '\t' + str(df_total_must_run.loc[h,z]) + '\n')
         f.write(';\n\n')
-
+    
         # zonal (daily)
         f.write('param:' + '\t' + 'SimGasPrice:=' + '\n')
         for z in zones:
             for d in range(0,int(SimHours/24)):
                 f.write(z + '\t' + str(d+1) + '\t' + str(df_ng.loc[d,z]) + '\n')
         f.write(';\n\n')
-
+    
         #system wide (daily)
         f.write('param:' + '\t' + 'SimPath66_imports' + '\t' + 'SimPath46_SCE_imports' + '\t' + 'SimPath61_imports' + '\t' + 'SimPath42_imports' + '\t' + 'SimPath24_imports' + '\t' + 'SimPath45_imports' + '\t' + 'SimPGE_valley_hydro' + '\t' + 'SimSCE_hydro:=' + '\n')
         for d in range(0,len(df_imports)):
                 f.write(str(d+1) + '\t' + str(df_imports.loc[d,'Path66']) + '\t' + str(df_imports.loc[d,'Path46_SCE']) + '\t' + str(df_imports.loc[d,'Path61']) + '\t' + str(df_imports.loc[d,'Path42']) + '\t' + str(df_imports.loc[d,'Path24']) + '\t' + str(df_imports.loc[d,'Path45']) + '\t' + str(df_hydro.loc[d,'PGE_valley']) + '\t' + str(df_hydro.loc[d,'SCE']) + '\n')
         f.write(';\n\n')
-
-
+    
+    
         #system wide (hourly)
         f.write('param:' + '\t' + 'SimPath66_exports' + '\t' + 'SimPath42_exports' + '\t' + 'SimPath24_exports' + '\t' + 'SimPath45_exports' + '\t' + 'SimReserves' + '\t' + 'SimSCE_hydro_minflow' + '\t' + 'SimPGE_valley_hydro_minflow' + '\t' + 'SimPath61_imports_minflow' + '\t' + 'SimPath66_imports_minflow' + '\t' + 'SimPath46_SCE_imports_minflow' + '\t' + 'SimPath42_imports_minflow:=' + '\n')
         for h in range(0,len(df_load)):
                 f.write(str(h+1) + '\t' + str(df_exports.loc[h,'Path66']) + '\t' + str(df_exports.loc[h,'Path42']) + '\t' + str(df_exports.loc[h,'Path24']) + '\t' + str(df_exports.loc[h,'Path45']) + '\t' + str(df_reserves.loc[h,'reserves'])  + '\t' + str(df_CA_hydro_mins.loc[h,'SCE']) + '\t' + str(df_CA_hydro_mins.loc[h,'PGE_valley']) + '\t' + str(df_CA_import_mins.loc[h,'Path61']) + '\t' + str(df_CA_import_mins.loc[h,'Path66']) + '\t' + str(df_CA_import_mins.loc[h,'Path46_SCE']) + '\t' + str(df_CA_import_mins.loc[h,'Path42']) + '\n')
         f.write(';\n\n')
-
+    
         
         
         

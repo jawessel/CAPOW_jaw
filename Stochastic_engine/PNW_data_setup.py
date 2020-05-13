@@ -38,14 +38,14 @@ def setup(year,scenario,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
     header = scenario + '_PNW'
     df_wind = df_wind.loc[:,header]
     df_wind = df_wind.loc[year*8760:year*8760+8759]
-    df_wind = df_wind.reset_index()
+    df_wind = df_wind.reset_index(drop=True)
 
     ##time series solar for each TAC
     df_solar = pd.read_csv('Synthetic_solar_power/solar_power_sim.csv',header=0)
     header = scenario + '_PNW'
     df_solar = df_solar.loc[:,header]
     df_solar = df_solar.loc[year*8760:year*8760+8759]
-    df_solar = df_solar.reset_index()
+    df_solar = df_solar.reset_index(drop=True)
 
     ##daily time series of dispatchable imports by path
     filename = 'Path_setup/PNW_dispatchable_imports_' + scenario + '.csv'
@@ -291,7 +291,7 @@ def setup(year,scenario,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
         for z in zones:
             for h in range(0,len(df_load)):
                 f.write(z + '\t' + str(h+1) + '\t' + str(df_load.loc[h,z])\
-                + '\t' + str(df_wind.loc[h,z]) + '\t' + str(df_solar.loc[h,z])\
+                + '\t' + str(df_wind[h]) + '\t' + str(df_solar[h])\
                 + '\t' + str(df_total_must_run.loc[h,z]) + '\n')
         f.write(';\n\n')
 
@@ -490,7 +490,7 @@ def setup(year,scenario,PNW_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
         for z in zones:
             for h in range(0,len(df_load)):
                 f.write(z + '\t' + str(h+1) + '\t' + str(df_load.loc[h,z])\
-                + '\t' + str(df_wind.loc[h,z]) + '\t' + str(df_solar.loc[h,z])\
+                + '\t' + str(df_wind[h]) + '\t' + str(df_solar[h])\
                 + '\t' + str(df_total_must_run.loc[h,z]) + '\n')
         f.write(';\n\n')
 
