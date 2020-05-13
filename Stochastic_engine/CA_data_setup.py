@@ -350,6 +350,10 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
         f.write(';\n\n')
         #scale factor for capacity is proportional load of each zone to CA as a whole
         
+        
+        START HERE NEED VRE CAPS
+        
+        
         # times series data
         # zonal (hourly)
         f.write('param:' + '\t' + 'SimDemand' + '\t' + 'SimWind' \
@@ -359,7 +363,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
             wz = wind_caps.loc[0,z]
             for h in range(0,len(df_load)):
                 f.write(z + '\t' + str(h+1) + '\t' + str(df_load.loc[h,z])\
-                + '\t' + str(df_wind[h]*wz) + '\t' + str(df_solar[h]*sz)\
+                + '\t' + str(df_wind[h,scenario]*wz) + '\t' + str(df_solar[h,scenario]*sz)\
                 + '\t' + str(df_total_must_run.loc[h,z]) + '\n')
         f.write(';\n\n')
     
@@ -600,7 +604,7 @@ def setup(year,scenario,CAISO_bat_cap,bat_RoC_coeff,bat_RoD_coeff,bat_eff):
             wz = wind_caps.loc[0,z]
             for h in range(0,len(df_load)):
                 f.write(z + '\t' + str(h+1) + '\t' + str(df_load.loc[h,z])\
-                + '\t' + str(df_wind[h]*wz) + '\t' + str(df_solar[h]*sz)\
+                + '\t' + str(df_wind[h,scenario]*wz) + '\t' + str(df_solar[h,scenario]*sz)\
                 + '\t' + str(df_total_must_run.loc[h,z]) + '\n')
         f.write(';\n\n')
 
