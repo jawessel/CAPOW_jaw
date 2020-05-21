@@ -15,35 +15,35 @@ import pandas as pd
 ## that stochastic input generation can occur as many times as desired.
 import time
 starttime = time.time()
-##import calculate_cov
-#
-#############################################################################
-## STOCHASTIC WEATHER AND STREAMFLOW GENERATION
-#
-## Specify a number of synthetic weather years to be simulated. Then
-## edit the /cord/data/input/base_inflows.json file, specifying the start and end 
-## dates of the forecast_exp scenario flow files. Start date must be 1/1/1901.
-## End dates (stoch_years) must be + 3 years beyond desired end of simulation. Note that
-## inflow files for ORCA (input/forecast_flows.csv) needs to include leap days. 
-#
-#stoch_years=100
-#
-## Generate synthetic weather (wind speed and temperature) records. 
-#import synthetic_temp_wind_v3
-#synthetic_temp_wind_v3.synthetic(stoch_years)
-#print('synth weather')
-#
-## Generate synthetic streamflow records 
-#import synthetic_streamflow_v2
-#print('streamflows')
-#
-###############################################################################
-###
-###############################################################################
-### DAILY HYDROPOWER SIMULATION
+#import calculate_cov
+
+############################################################################
+# STOCHASTIC WEATHER AND STREAMFLOW GENERATION
+
+# Specify a number of synthetic weather years to be simulated. Then
+# edit the /cord/data/input/base_inflows.json file, specifying the start and end 
+# dates of the forecast_exp scenario flow files. Start date must be 1/1/1901.
+# End dates (stoch_years) must be + 3 years beyond desired end of simulation. Note that
+# inflow files for ORCA (input/forecast_flows.csv) needs to include leap days. 
+
+stoch_years=100
+
+# Generate synthetic weather (wind speed and temperature) records. 
+import synthetic_temp_wind_v3
+synthetic_temp_wind_v3.synthetic(stoch_years)
+print('synth weather')
+
+# Generate synthetic streamflow records 
+import synthetic_streamflow_v2
+print('streamflows')
+
+##############################################################################
 ##
-## Now specify a smaller subset of stochastic data to run (must be <= stoch years)
-sim_years = 2
+##############################################################################
+## DAILY HYDROPOWER SIMULATION
+#
+# Now specify a smaller subset of stochastic data to run (must be <= stoch years)
+sim_years = 100
 #
 # Run ORCA to get California storage dam releases
 import main
