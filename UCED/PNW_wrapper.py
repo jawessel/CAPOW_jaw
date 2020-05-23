@@ -225,7 +225,10 @@ def sim(days):
                 for index in cobject:
                      if int(index>0 and index<25):
     #                print ("   Constraint",c)
-                         Duals.append((str(c),index+((day-1)*24), instance2.dual[cobject[index]]))
+                         try:
+                             Duals.append((str(c),index+((day-1)*24), instance2.dual[cobject[index]]))
+                         except KeyError:
+                             Duals.append((str(c),index+((day-1)*24),-999))
     #            print ("      ", index, instance2.dual[cobject[index]])
 
      
