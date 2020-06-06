@@ -34,7 +34,7 @@ import pyomo.environ as pyo
 def sim(days):
     
     instance = m1.create_instance('data.dat')
-    instance2 = m2.create_instance('data.dat')
+    instance2 = m2.create_instance('dataLP.dat')
     
     instance2.dual = pyo.Suffix(direction=pyo.Suffix.IMPORT)
     opt = SolverFactory("gurobi")

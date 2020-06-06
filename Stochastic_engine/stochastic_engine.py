@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#-*- coding: utf-8 -*-
 """
 Created on Wed Sep 19 09:59:48 2018
 @author: YSu
@@ -14,7 +14,7 @@ import pandas as pd
 ## Note: this script ('calculatte_cov') only needs to be performed once; after
 ## that stochastic input generation can occur as many times as desired.
 import time
-starttime = time.time()
+# starttime = time.time()
 #import calculate_cov
 
 ############################################################################
@@ -26,7 +26,7 @@ starttime = time.time()
 # End dates (stoch_years) must be + 3 years beyond desired end of simulation. Note that
 # inflow files for ORCA (input/forecast_flows.csv) needs to include leap days. 
 
-stoch_years=100
+stoch_years=103
 
 # Generate synthetic weather (wind speed and temperature) records. 
 #import synthetic_temp_wind_v3
@@ -42,7 +42,7 @@ stoch_years=100
 ##############################################################################
 ## DAILY HYDROPOWER SIMULATION
 #
-# Now specify a smaller subset of stochastic data to run (must be <= stoch years)
+# Now specify a smaller subset of stochastic data to run (must be <= stoch years-3)
 sim_years = 100
 #
 # Run ORCA to get California storage dam releases
