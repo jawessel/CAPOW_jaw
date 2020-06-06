@@ -242,6 +242,9 @@ def SysCost(model):
     gas1_5 = sum(model.mwh_1[j,i]*(model.seg1[j]*model.GasPrice['PNW'] + model.var_om[j]) for i in model.hh_periods for j in model.Gas)
     gas2_5 = sum(model.mwh_2[j,i]*(model.seg2[j]*model.GasPrice['PNW'] + model.var_om[j]) for i in model.hh_periods for j in model.Gas)
     gas3_5 = sum(model.mwh_3[j,i]*(model.seg3[j]*model.GasPrice['PNW'] + model.var_om[j]) for i in model.hh_periods for j in model.Gas)
+    imports1 = sum(model.mwh_1[j,i]*5 for i in model.hh_periods for j in model.WECCImports)
+    imports2 = sum(model.mwh_2[j,i]*5 for i in model.hh_periods for j in model.WECCImports)
+    imports3 = sum(model.mwh_3[j,i]*5 for i in model.hh_periods for j in model.WECCImports)
     oil1 = sum(model.mwh_1[j,i]*(model.seg1[j]*20 + model.var_om[j]) for i in model.hh_periods for j in model.Oil)
     oil2 = sum(model.mwh_2[j,i]*(model.seg2[j]*20 + model.var_om[j]) for i in model.hh_periods for j in model.Oil)
     oil3 = sum(model.mwh_3[j,i]*(model.seg3[j]*20 + model.var_om[j]) for i in model.hh_periods for j in model.Oil)
@@ -257,7 +260,7 @@ def SysCost(model):
     fixed_slack = sum(model.no_load[j]*model.on[j,i]*10000 for i in model.hh_periods for j in model.Slack)
     starts = sum(model.st_cost[j]*model.switch[j,i] for i in model.hh_periods for j in model.Generators)
     reserves = sum(model.nrsv[j,i] for i in model.hh_periods for j in model.Reserves) + sum(model.nrsv[j,i]*10000 for i in model.hh_periods for j in model.Slack)
-    return fixed_slack + fixed_oil + fixed_gas5 + fixed_coal + coal1 + coal2 + coal3 + nuc1 + nuc2 + nuc3 + gas1_5 + gas2_5 + gas3_5 + oil1 + oil2 + oil3 + psh1 + psh2 + psh3 + slack1 + slack2 + slack3 + starts + reserves
+    return imports1 + imports2 + imports3 + fixed_slack + fixed_oil + fixed_gas5 + fixed_coal + coal1 + coal2 + coal3 + nuc1 + nuc2 + nuc3 + gas1_5 + gas2_5 + gas3_5 + oil1 + oil2 + oil3 + psh1 + psh2 + psh3 + slack1 + slack2 + slack3 + starts + reserves
 model.SystemCost = Objective(rule=SysCost, sense=minimize)
 
 
