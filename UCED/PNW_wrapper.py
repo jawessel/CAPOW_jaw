@@ -189,7 +189,7 @@ def sim(days):
                 d = discharge[(discharge['Hour'] == (day-1)*24+i) & (discharge['Zone']==z)]
                 d = np.float(d['Value'].values)
                 
-                instance2.HorizonDemand[z,i] = max(instance2.SimDemand[z,(day-1)*24+i] + charge.iloc[(i,z),'Value'] - discharge.iloc[(i,z),'Value'],0) #make sure it stays non-negative using max(x,0)
+                instance2.HorizonDemand[z,i] = max(instance2.SimDemand[z,(day-1)*24+i] + c - d,0) #make sure it stays non-negative using max(x,0)
                 instance2.HorizonWind[z,i] = instance2.SimWind[z,(day-1)*24+i]
                 instance2.HorizonSolar[z,i] = instance2.SimSolar[z,(day-1)*24+i]
                 instance2.HorizonMustRun[z,i] = instance2.SimMustRun[z,(day-1)*24+i]
