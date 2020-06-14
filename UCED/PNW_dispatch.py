@@ -18,7 +18,7 @@ from pyomo.opt import SolverFactory
 import itertools
 
 ##Create a solver
-opt = SolverFactory('cplex')
+opt = SolverFactory('gurobi')
 
 model = AbstractModel()
 #
@@ -268,7 +268,10 @@ def SysCost(model):
     fixed_slack = sum(model.no_load[j]*model.on[j,i]*10000 for i in model.hh_periods for j in model.Slack)
     starts = sum(model.st_cost[j]*model.switch[j,i] for i in model.hh_periods for j in model.Generators)
     reserves = sum(model.nrsv[j,i] for i in model.hh_periods for j in model.Reserves) + sum(model.nrsv[j,i]*10000 for i in model.hh_periods for j in model.Slack)
-    return imports1 + imports2 + imports3 + fixed_slack + fixed_oil + fixed_gas5 + fixed_coal + coal1 + coal2 + coal3 + nuc1 + nuc2 + nuc3 + gas1_5 + gas2_5 + gas3_5 + oil1 + oil2 + oil3 + psh1 + psh2 + psh3 + slack1 + slack2 + slack3 + starts + reserves
+    wind1 = sum(model.wind['PNW',i]*0.01 for i in model.hh_periods)
+    solar1 = sum(model.solar['PNW',i]*0.01 for i in model.hh_periods)
+    return imports1 + imports2 + imports3 + fixed_slack + fixed_oil + fixed_gas5 + fixed_coal + coal1 + coal2 + coal3 + nuc1 + nuc2 + nuc3 + gas1_5 + gas2_5 + gas3_5 + \
+        oil1 + oil2 + oil3 + psh1 + psh2 + psh3 + slack1 + slack2 + slack3 + starts + reserves + wind1 + solar1
 model.SystemCost = Objective(rule=SysCost, sense=minimize)
 
 

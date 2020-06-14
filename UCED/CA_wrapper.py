@@ -858,6 +858,8 @@ def sim(days):
     wind_pd=pd.DataFrame(wind,columns=('Zone','Time','Value'))
     flow_pd=pd.DataFrame(flow,columns=('Source','Sink','Time','Value'))
     shadow_price=pd.DataFrame(Duals,columns=('Constraint','Time','Value'))
+    #wind_curtailment = pd.DataFrame(WIND CURTAIL FORMULA, columns=('Generator','Time','Value','Zones'))
+    #solar_curtailment = pd.DataFrame(SOLAR CURTAIL FORMULA, columns=('Generator','Time','Value','Zones'))
     objective = pd.DataFrame(System_cost)
 
 
@@ -875,6 +877,8 @@ def sim(days):
     solar_pd.to_csv('solar_out.csv')
     wind_pd.to_csv('wind_out.csv')
     shadow_price.to_csv('shadow_price.csv')
+    #wind_curtailment.to_csv('wind_curtailment.csv')
+    #solar_curtailment.to_csv('solar_curtailment.csv')
     objective.to_csv('obj_function.csv')
 
     return None

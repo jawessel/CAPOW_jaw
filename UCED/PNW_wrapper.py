@@ -189,7 +189,7 @@ def sim(days):
                 d = discharge[(discharge['Hour'] == (day-1)*24+i) & (discharge['Zone']==z)]
                 d = np.float(d['Value'].values)
                 
-                instance2.HorizonDemand[z,i] = max(instance2.SimDemand[z,(day-1)*24+i] + charge.iloc[(i,z),'Value'] - discharge.iloc[(i,z),'Value'],0) #make sure it stays non-negative using max(x,0)
+                instance2.HorizonDemand[z,i] = max(instance2.SimDemand[z,(day-1)*24+i] + c - d,0) #make sure it stays non-negative using max(x,0)
                 instance2.HorizonWind[z,i] = instance2.SimWind[z,(day-1)*24+i]
                 instance2.HorizonSolar[z,i] = instance2.SimSolar[z,(day-1)*24+i]
                 instance2.HorizonMustRun[z,i] = instance2.SimMustRun[z,(day-1)*24+i]
@@ -542,6 +542,8 @@ def sim(days):
     solar_pd=pd.DataFrame(solar,columns=('Zone','Time','Value'))
     wind_pd=pd.DataFrame(wind,columns=('Zone','Time','Value'))
     shadow_price=pd.DataFrame(Duals,columns=('Constraint','Time','Value'))
+    #wind_curtailment = pd.DataFrame(WIND CURTAIL FORMULA, columns=('Generator','Time','Value','Zones'))
+    #solar_curtailment = pd.DataFrame(SOLAR CURTAIL FORMULA, columns=('Generator','Time','Value','Zones'))
     objective = pd.DataFrame(System_cost)
         
     mwh_1_pd.to_csv('mwh_1.csv')
@@ -557,6 +559,8 @@ def sim(days):
     solar_pd.to_csv('solar_out.csv')
     wind_pd.to_csv('wind_out.csv')
     shadow_price.to_csv('shadow_price.csv')
+    #wind_curtailment.to_csv('wind_curtailment.csv')
+    #solar_curtailment.to_csv('solar_curtailment.csv')
     objective.to_csv('obj_function.csv')
     
     return None

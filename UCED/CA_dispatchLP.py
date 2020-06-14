@@ -18,7 +18,7 @@ from pyomo.opt import SolverFactory
 import itertools
 
 ##Create a solver
-opt = SolverFactory('cplex')
+opt = SolverFactory('gurobi')
 
 model = AbstractModel()
 #
@@ -289,8 +289,18 @@ def SysCost(model):
     slack3 = sum(model.mwh_3[j,i]*model.seg3[j]*10000 for i in model.hh_periods for j in model.Slack)
     starts = sum(model.st_cost[j]*model.switch[j,i] for i in model.hh_periods for j in model.Generators)
     exchange = sum(model.flow[s,k,i]*model.hurdle[s,k] for s in model.sources for k in model.sinks for i in model.hh_periods)
+    wind1 = sum(model.wind['PGE_valley',i]*0.01 for i in model.hh_periods)
+    wind2 = sum(model.wind['PGE_bay',i]*0.01 for i in model.hh_periods)
+    wind3 = sum(model.wind['SCE',i]*0.01 for i in model.hh_periods)
+    wind4 = sum(model.wind['SDGE',i]*0.01 for i in model.hh_periods)
+    solar1 = sum(model.solar['PGE_valley',i]*0.01 for i in model.hh_periods)
+    solar2 = sum(model.solar['PGE_bay',i]*0.01 for i in model.hh_periods)
+    solar3 = sum(model.solar['SCE',i]*0.01 for i in model.hh_periods)
+    solar4 = sum(model.solar['SDGE',i]*0.01 for i in model.hh_periods)
     reserves = sum(model.nrsv[j,i] for i in model.hh_periods for j in model.Reserves) + sum(model.nrsv[j,i]*10000 for i in model.hh_periods for j in model.Slack)
-    return fixed + coal1 + coal2 + coal3 + gas1_1 + gas1_2 + gas1_3 + gas1_4 + gas2_1 + gas2_2 + gas2_3 + gas2_4 + gas3_1 + gas3_2 + gas3_3 + gas3_4 + sce_imports1 + sce_imports2 + sce_imports3 + sdge_imports1 + sdge_imports2 + sdge_imports3 + pgev_imports1 + pgev_imports2 + pgev_imports3 + oil1 + oil2 + oil3 + psh1 + psh2 + psh3 + slack1 + slack2 + slack3 + starts + exchange + reserves
+    return fixed + coal1 + coal2 + coal3 + gas1_1 + gas1_2 + gas1_3 + gas1_4 + gas2_1 + gas2_2 + gas2_3 + gas2_4 + gas3_1 + gas3_2 + gas3_3 + gas3_4 + \
+        sce_imports1 + sce_imports2 + sce_imports3 + sdge_imports1 + sdge_imports2 + sdge_imports3 + pgev_imports1 + pgev_imports2 + pgev_imports3 + \
+        oil1 + oil2 + oil3 + psh1 + psh2 + psh3 + slack1 + slack2 + slack3 + starts + exchange + reserves + wind1 + wind2 + wind3 + wind4 + solar1 + solar2 + solar3 + solar4
 model.SystemCost = Objective(rule=SysCost, sense=minimize)
 
 
