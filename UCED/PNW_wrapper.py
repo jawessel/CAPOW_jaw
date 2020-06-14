@@ -517,15 +517,15 @@ def sim(days):
                 instance.nrsv[j,0] = newval_nrsv 
                 instance.nrsv[j,0].fixed = True        
                    
-            for j in instance.Zone5Battery:
-                              
-                if instance.bat_SoC[j,24].value <=0 and instance.bat_SoC[j,24].value>= -0.0001:
-                    newval_1=0
-                else:
-                    newval_1=instance.bat_SoC[j,24].value
-
-                instance.bat_SoC[j,0] = newval_1
-                instance.bat_SoC[j,0].fixed = True
+#            for j in instance.Zone5Battery:
+#                              
+#                if instance.bat_SoC[j,24].value <=0 and instance.bat_SoC[j,24].value>= -0.0001:
+#                    newval_1=0
+#                else:
+#                    newval_1=instance.bat_SoC[j,24].value
+#
+#                instance.bat_SoC[j,0] = newval_1
+#                instance.bat_SoC[j,0].fixed = True
             
         print(day)
     

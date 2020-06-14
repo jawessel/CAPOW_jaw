@@ -14,7 +14,7 @@ import pandas as pd
 ## Note: this script ('calculatte_cov') only needs to be performed once; after
 ## that stochastic input generation can occur as many times as desired.
 import time
-# starttime = time.time()
+starttime = time.time()
 #import calculate_cov
 
 ############################################################################
@@ -43,7 +43,7 @@ stoch_years=103
 ## DAILY HYDROPOWER SIMULATION
 #
 # Now specify a smaller subset of stochastic data to run (must be <= stoch years-3)
-sim_years = 100
+sim_years = 5
 #
 # Run ORCA to get California storage dam releases
 import main
