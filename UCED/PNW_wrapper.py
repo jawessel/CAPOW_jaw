@@ -256,6 +256,19 @@ def sim(days):
         
         
         print ("Duals")
+        
+        # Define curtailment as any time when wind dispatched by the model (e.g., the sum of model.wind for a given hour, zone)
+        # is less than the amount of wind that could be dispatched, (i.e .the value of SimWind for the same zone, hour).
+        # (reported on a daily basis)
+        wind_curtailment = []
+        solar_curtailment = []
+        wind_curtailment_daily = []
+        solar_curtailment_daily = []
+
+        #append curtailment based on difference between amount dispatched and amount that could be dispatched
+        for i in range(1,25):
+            wind_curtailment.append(max(instance2.wind['PNW',i] - instance2.HorizonWind['PNW',i],0))
+            solar_curtailment.append(max(instance2.solar['PNW',i] - instance2.HorizonSolar['PNW',i],0))
     
         for c in instance2.component_objects(Constraint, active=True):
     #        print ("   Constraint",c)
@@ -526,19 +539,6 @@ def sim(days):
 
                 instance.bat_SoC[j,0] = newval_1
                 instance.bat_SoC[j,0].fixed = True
-            
-            # Define curtailment as any time when wind dispatched by the model (e.g., the sum of model.wind for a given hour, zone)
-            # is less than the amount of wind that could be dispatched, (i.e .the value of SimWind for the same zone, hour).
-            # (reported on a daily basis)
-            wind_curtailment = []
-            solar_curtailment = []
-            wind_curtailment_daily = []
-            solar_curtailment_daily = []
-
-            #append curtailment based on difference between amount dispatched and amount that could be dispatched
-            for i in range(25):
-                wind_curtailment.append(max(instance2.wind['PNW',i] - instance2.HorizonWind['PNW',i],0))
-                solar_curtailment.append(max(instance2.solar['PNW',i] - instance2.HorizonSolar['PNW',i],0))
             
         print(day)
     
