@@ -267,8 +267,10 @@ def sim(days):
 
         #append curtailment based on difference between amount dispatched and amount that could be dispatched
         for i in range(1,25):
-            wind_curtailment.append(max(instance2.wind['PNW',i] - instance2.HorizonWind['PNW',i],0))
-            solar_curtailment.append(max(instance2.solar['PNW',i] - instance2.HorizonSolar['PNW',i],0))
+            wind_cur = instance2.wind['PNW',i] - instance2.HorizonWind['PNW',i]
+            solar_cur = instance2.solar['PNW',i] - instance2.HorizonSolar['PNW',i]
+            wind_curtailment.append(wind_cur)
+            solar_curtailment.append(solar_cur)
     
         for c in instance2.component_objects(Constraint, active=True):
     #        print ("   Constraint",c)
