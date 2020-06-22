@@ -59,6 +59,10 @@ def sim(days):
     Generator=[]
     Duals=[]
     System_cost = []
+    wind_curtailment = []
+    solar_curtailment = []
+    wind_curtailment_daily = []
+    solar_curtailment_daily = []
 
     df_generators = pd.read_csv('generators.csv',header=0)
     
@@ -260,15 +264,11 @@ def sim(days):
         # Define curtailment as any time when wind dispatched by the model (e.g., the sum of model.wind for a given hour, zone)
         # is less than the amount of wind that could be dispatched, (i.e .the value of SimWind for the same zone, hour).
         # (reported on a daily basis)
-        wind_curtailment = []
-        solar_curtailment = []
-        wind_curtailment_daily = []
-        solar_curtailment_daily = []
 
         #append curtailment based on difference between amount dispatched and amount that could be dispatched
         for i in range(1,25):
-            wind_cur = instance2.wind['PNW',i] - instance2.HorizonWind['PNW',i]
-            solar_cur = instance2.solar['PNW',i] - instance2.HorizonSolar['PNW',i]
+            wind_cur = instance2.HorizonWind['PNW',i].value - instance2.wind['PNW',i].value
+            solar_cur = instance2.HorizonSolar['PNW',i].value - instance2.solar['PNW',i].value
             wind_curtailment.append(wind_cur)
             solar_curtailment.append(solar_cur)
     

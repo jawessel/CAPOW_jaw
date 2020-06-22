@@ -50,6 +50,10 @@ def sim(days):
     battery_discharge = []
     battery_charge = []
     battery_state = []
+    wind_curtailment_PGE_Valley, wind_curtailment_PGE_Bay, wind_curtailment_SCE, wind_curtailment_SDGE = [], [], [], []
+    solar_curtailment_PGE_Valley, solar_curtailment_PGE_Bay, solar_curtailment_SCE, solar_curtailment_SDGE = [], [], [], []
+    wind_curtailment_daily_PGE_Valley, wind_curtailment_daily_PGE_Bay, wind_curtailment_daily_SCE, wind_curtailment_daily_SDGE = [], [], [], []
+    solar_curtailment_daily_PGE_Valley, solar_curtailment_daily_PGE_Bay, solar_curtailment_daily_SCE, solar_curtailment_daily_SDGE = [], [], [], []
     df_generators = pd.read_csv('generators.csv',header=0)
 
     #max here can be (1,365)
@@ -290,6 +294,29 @@ def sim(days):
 
 
         print ("Duals")
+
+        # Define curtailment as any time when wind dispatched by the model (e.g., the sum of model.wind for a given hour, zone)
+        # is less than the amount of wind that could be dispatched, (i.e .the value of SimWind for the same zone, hour).
+        # (reported on a daily basis)
+        
+        #append curtailment based on difference between amount dispatched and amount that could be dispatched
+        for i in range(1,25):
+            wind_cur_PGE_Valley = instance2.HorizonWind['PGE_valley',i].value - instance2.wind['PGE_valley',i].value
+            solar_cur_PGE_Valley = instance2.HorizonSolar['PGE_valley',i].value - instance2.solar['PGE_valley',i].value
+            wind_cur_PGE_Bay = instance2.HorizonWind['PGE_bay',i].value - instance2.wind['PGE_bay',i].value
+            solar_cur_PGE_Bay = instance2.HorizonSolar['PGE_bay',i].value - instance2.solar['PGE_bay',i].value
+            wind_cur_SCE = instance2.HorizonWind['SCE',i].value - instance2.wind['SCE',i].value
+            solar_cur_SCE = instance2.HorizonSolar['SCE',i].value - instance2.solar['SCE',i].value
+            wind_cur_SDGE = instance2.HorizonWind['SDGE',i].value - instance2.wind['SDGE',i].value
+            solar_cur_SDGE = instance2.HorizonSolar['SDGE',i].value - instance2.solar['SDGE',i].value            
+            wind_curtailment_PGE_Valley.append(wind_cur_PGE_Valley)
+            solar_curtailment_PGE_Valley.append(solar_cur_PGE_Valley)
+            wind_curtailment_PGE_Bay.append(wind_cur_PGE_Bay)
+            solar_curtailment_PGE_Bay.append(solar_cur_PGE_Bay)
+            wind_curtailment_SCE.append(wind_cur_SCE)
+            solar_curtailment_SCE.append(solar_cur_SCE)
+            wind_curtailment_SDGE.append(wind_cur_SDGE)
+            solar_curtailment_SDGE.append(solar_cur_SDGE)
 
         for c in instance2.component_objects(Constraint, active=True):
     #        print ("   Constraint",c)
@@ -858,10 +885,32 @@ def sim(days):
     wind_pd=pd.DataFrame(wind,columns=('Zone','Time','Value'))
     flow_pd=pd.DataFrame(flow,columns=('Source','Sink','Time','Value'))
     shadow_price=pd.DataFrame(Duals,columns=('Constraint','Time','Value'))
-    #wind_curtailment = pd.DataFrame(WIND CURTAIL FORMULA, columns=('Generator','Time','Value','Zones'))
-    #solar_curtailment = pd.DataFrame(SOLAR CURTAIL FORMULA, columns=('Generator','Time','Value','Zones'))
     objective = pd.DataFrame(System_cost)
 
+    #sum curtailment every 24 hours to get a daily value
+    for i in range(365):
+        wind_curtailment_daily_PGE_Valley.append(sum(wind_curtailment_PGE_Valley[i*24:24*(1+i)]))
+        solar_curtailment_daily_PGE_Valley.append(sum(solar_curtailment_PGE_Valley[i*24:24*(1+i)]))
+        wind_curtailment_daily_PGE_Bay.append(sum(wind_curtailment_PGE_Bay[i*24:24*(1+i)]))
+        solar_curtailment_daily_PGE_Bay.append(sum(solar_curtailment_PGE_Bay[i*24:24*(1+i)]))
+        wind_curtailment_daily_SCE.append(sum(wind_curtailment_SCE[i*24:24*(1+i)]))
+        solar_curtailment_daily_SCE.append(sum(solar_curtailment_SCE[i*24:24*(1+i)]))
+        wind_curtailment_daily_SDGE.append(sum(wind_curtailment_SDGE[i*24:24*(1+i)]))
+        solar_curtailment_daily_SDGE.append(sum(solar_curtailment_SDGE[i*24:24*(1+i)]))
+    
+    #output curtailment to dataframe and then csv\
+    wind_curtailment_daily = {'PGE_Valley':wind_curtailment_daily_PGE_Valley,\
+                              'PGE_Bay':wind_curtailment_daily_PGE_Bay,\
+                              'SCE':wind_curtailment_daily_SCE,\
+                              'SDGE':wind_curtailment_daily_SDGE}
+    solar_curtailment_daily = {'PGE_Valley':solar_curtailment_daily_PGE_Valley,\
+                              'PGE_Bay':solar_curtailment_daily_PGE_Bay,\
+                              'SCE':solar_curtailment_daily_SCE,\
+                              'SDGE':solar_curtailment_daily_SDGE}
+    wind_curtailment_pd = pd.DataFrame(wind_curtailment_daily,columns=('PGE_Valley','PGE_Bay','SCE','SDGE'))
+    solar_curtailment_pd = pd.DataFrame(solar_curtailment_daily,columns=('PGE_Valley','PGE_Bay','SCE','SDGE'))
+    wind_curtailment_pd.to_csv('wind_curtailment_daily.csv')
+    solar_curtailment_pd.to_csv('solar_curtailment_daily.csv')
 
     flow_pd.to_csv('flow.csv')
     mwh_1_pd.to_csv('mwh_1.csv')
@@ -877,8 +926,6 @@ def sim(days):
     solar_pd.to_csv('solar_out.csv')
     wind_pd.to_csv('wind_out.csv')
     shadow_price.to_csv('shadow_price.csv')
-    #wind_curtailment.to_csv('wind_curtailment.csv')
-    #solar_curtailment.to_csv('solar_curtailment.csv')
     objective.to_csv('obj_function.csv')
 
     return None
