@@ -59,6 +59,9 @@ def sim(days):
     Generator=[]
     Duals=[]
     System_cost = []
+    battery_charge = []
+    battery_discharge =[]
+    battery_state = []
     wind_curtailment = []
     solar_curtailment = []
     wind_curtailment_daily = []
@@ -421,27 +424,27 @@ def sim(days):
                 if index[0] in instance.Zone5Generators:
                  on.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
                  
-#            if a == 'bat_discharge':
-#                
-#                for index in varobject:
-#                    if int(index[1]>0 and index[1]<25):
-#                        if index[0] in instance.Zone5Battery:
-#                            battery_discharge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
-#
-#            if a == 'bat_charge':
-#                
-#                for index in varobject:
-#                    if int(index[1]>0 and index[1]<25):
-#                        if index[0] in instance.Zone5Battery:
-#                            battery_charge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
-#
-#
-#            if a == 'bat_SoC':
-#                
-#                for index in varobject:
-#                    if int(index[1]>0 and index[1]<25):
-#                        if index[0] in instance.Zone5Battery:
-#                            battery_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
+            if a == 'bat_discharge':
+                
+                for index in varobject:
+                    if int(index[1]>0 and index[1]<25):
+                        if index[0] in instance.Zone5Battery:
+                            battery_discharge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
+
+            if a == 'bat_charge':
+                
+                for index in varobject:
+                    if int(index[1]>0 and index[1]<25):
+                        if index[0] in instance.Zone5Battery:
+                            battery_charge.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
+
+
+            if a == 'bat_SoC':
+                
+                for index in varobject:
+                    if int(index[1]>0 and index[1]<25):
+                        if index[0] in instance.Zone5Battery:
+                            battery_state.append((index[0],index[1]+((day-1)*24),varobject[index].value,'PNW'))
              
             if a=='switch':
             
@@ -548,9 +551,9 @@ def sim(days):
     mwh_2_pd=pd.DataFrame(mwh_2,columns=('Generator','Time','Value','Zones','Type','$/MWh'))
     mwh_3_pd=pd.DataFrame(mwh_3,columns=('Generator','Time','Value','Zones','Type','$/MWh'))
     on_pd=pd.DataFrame(on,columns=('Generator','Time','Value','Zones'))
-    battery_charge_pd = pd.DataFrame(bat_ch, columns=('Generator','Time','Value','Zones'))
-    battery_discharge_pd = pd.DataFrame(bat_dis, columns=('Generator','Time','Value','Zones'))
-    battery_state_pd = pd.DataFrame(bat_state, columns=('Generator','Time','Value','Zones'))    
+    battery_charge_pd = pd.DataFrame(battery_charge, columns=('Generator','Time','Value','Zones'))
+    battery_discharge_pd = pd.DataFrame(battery_discharge, columns=('Generator','Time','Value','Zones'))
+    battery_state_pd = pd.DataFrame(battery_state, columns=('Generator','Time','Value','Zones'))    
     switch_pd=pd.DataFrame(switch,columns=('Generator','Time','Value','Zones'))
     srsv_pd=pd.DataFrame(srsv,columns=('Generator','Time','Value','Zones'))
     nrsv_pd=pd.DataFrame(nrsv,columns=('Generator','Time','Value','Zones'))
